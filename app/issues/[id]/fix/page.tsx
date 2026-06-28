@@ -1,0 +1,212 @@
+"use client";
+
+import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
+import { doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { LoaderCircle, Wrench } from "lucide-react";
+import { FormEvent, useEffect, useState } from "react";
+
+import { AppShell } from "@/components/app-shell";
+import { useAuth } from "@/components/auth-provider";
+import { db, storage } from "@/lib/firebase";
+import { IssueRecord } from "@/lib/types";
+
+export default function FixIssuePage() {
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const { loading, user } = useAuth();
+  const [issue, setIssue] = useState<IssueRecord | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [issueLoaded, setIssueLoaded] = useState(false);
+  const missingIssueId = !params.id;
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/auth");
+    }
+  }, [loading, router, user]);
+
+  useEffect(() => {
+    if (missingIssueId) {
+      return;
+    }
+
+    return onSnapshot(
+      doc(db, "issues", params.id),
+      (snapshot) => {
+        if (!snapshot.exists()) {
+          setIssue(null);
+          setError("This issue could not be found.");
+          setIssueLoaded(true);
+          return;
+        }
+
+        setIssue({
+          id: snapshot.id,
+          ...(snapshot.data() as Omit<IssueRecord, "id">),
+        });
+        setError(null);
+        setIssueLoaded(true);
+      },
+      () => {
+        setIssue(null);
+        setError("Unable to load this issue right now.");
+        setIssueLoaded(true);
+      },
+    );
+  }, [missingIssueId, params.id]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!user || !issue || !file) {
+      setError("An after photo is required.");
+      return;
+    }
+
+    if (issue.status !== "open") {
+      setError("This issue is no longer available for claiming.");
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const extension = file.name.split(".").pop() ?? "jpg";
+      const storageRef = ref(
+        storage,
+        `issues/after/${user.uid}/${issue.id}-${Date.now()}.${extension}`,
+      );
+
+      await uploadBytes(storageRef, file, {
+        contentType: file.type,
+      });
+
+      const afterPhotoUrl = await getDownloadURL(storageRef);
+
+      await updateDoc(doc(db, "issues", issue.id), {
+        after_photo_url: afterPhotoUrl,
+        fixer_id: user.uid,
+        status: "pending",
+      });
+
+      router.push("/");
+    } catch (submissionError) {
+      const message =
+        submissionError instanceof Error
+          ? submissionError.message
+          : "Failed to submit repair proof.";
+      setError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <AppShell
+      title="Claim & Fix"
+      subtitle="Show the completed repair clearly so the moderation queue can approve it quickly."
+    >
+      {missingIssueId ? (
+        <div className="rounded-[30px] border border-[#f0b7b7] bg-[#fff1f1] px-5 py-10 text-center text-sm text-[#a63f3f]">
+          Missing issue id.
+        </div>
+      ) : !issue && !issueLoaded ? (
+        <div className="rounded-[30px] border border-dashed border-[#cbbfaa] bg-white/70 px-5 py-10 text-center text-sm text-[#47624b]">
+          Loading issue details...
+        </div>
+      ) : !issue ? (
+        <div className="rounded-[30px] border border-[#f0b7b7] bg-[#fff1f1] px-5 py-10 text-center text-sm text-[#a63f3f]">
+          {error ?? "This issue could not be loaded."}
+        </div>
+      ) : (
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.85fr)]">
+          <div className="overflow-hidden rounded-[30px] border border-[#d8d0c3] bg-white">
+            <div className="relative aspect-[16/10]">
+              <Image
+                src={issue.before_photo_url}
+                alt={issue.description}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1279px) 100vw, 55vw"
+              />
+            </div>
+            <div className="p-5">
+              <p className="text-sm leading-6 text-[#2c4633]">{issue.description}</p>
+              <p className="mt-3 text-sm font-semibold text-[#8f4b11]">
+                Reward: {issue.point_value} points
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={(event) => void handleSubmit(event)} className="space-y-4">
+            <label className="block rounded-[30px] border border-dashed border-[#cbbfaa] bg-white/80 p-5">
+              <span className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#123524]">
+                <Wrench className="h-4 w-4" />
+                After photo
+              </span>
+              <input
+                type="file"
+                accept="image/*"
+                required
+                onChange={(event) => {
+                  const nextFile = event.target.files?.[0] ?? null;
+
+                  if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                  }
+
+                  setFile(nextFile);
+                  setPreviewUrl(nextFile ? URL.createObjectURL(nextFile) : null);
+                }}
+                className="w-full text-sm text-[#47624b]"
+              />
+              {previewUrl ? (
+                <div className="relative mt-4 h-64 w-full overflow-hidden rounded-[24px]">
+                  <Image
+                    src={previewUrl}
+                    alt="Repair preview"
+                    fill
+                    unoptimized
+                    className="object-cover"
+                    sizes="(max-width: 1279px) 100vw, 40vw"
+                  />
+                </div>
+              ) : null}
+            </label>
+
+            {error ? (
+              <div className="rounded-3xl border border-[#f0b7b7] bg-[#fff1f1] px-4 py-3 text-sm text-[#a63f3f]">
+                {error}
+              </div>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={submitting || loading || issue.status !== "open"}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#123524] px-4 py-3 text-sm font-semibold text-[#f7f1e7] disabled:opacity-70"
+            >
+              {submitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
+              {issue.status === "open"
+                ? "Submit fix for review"
+                : "Issue already claimed"}
+            </button>
+          </form>
+        </div>
+      )}
+    </AppShell>
+  );
+}
