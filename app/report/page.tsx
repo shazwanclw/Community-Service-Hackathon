@@ -101,6 +101,7 @@ export default function ReportPage() {
 
       await addDoc(collection(db, "issues"), {
         reporter_id: user.uid,
+        reporter_name: user.displayName ?? user.email ?? "Community member",
         fixer_id: null,
         status: "open",
         description,
@@ -108,6 +109,14 @@ export default function ReportPage() {
         after_photo_url: null,
         point_value: score.total_points,
         created_at: serverTimestamp(),
+        claim_expires_at_ms: null,
+        claimed_at_ms: null,
+        extension_status: "none",
+        extension_reason: null,
+        extension_progress_note: null,
+        extension_requested_at_ms: null,
+        liked_by: [],
+        comments: [],
       });
 
       router.push("/");
@@ -124,15 +133,15 @@ export default function ReportPage() {
 
   return (
     <AppShell
-      title="Report"
-      subtitle="Snap the issue where it is, explain the problem clearly, and let Gemini estimate a fair point value."
+      title="Report an Issue"
+      subtitle="Post a problem to the community feed with a clear photo and description so someone nearby can take the task."
     >
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <form onSubmit={(event) => void handleSubmit(event)} className="space-y-4">
           <label className="block rounded-[30px] border border-dashed border-[#cbbfaa] bg-white/80 p-5">
             <span className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#123524]">
               <Camera className="h-4 w-4" />
-              Before photo
+              Problem photo
             </span>
             <input
               type="file"
@@ -154,7 +163,7 @@ export default function ReportPage() {
 
           <label className="block rounded-[30px] border border-[#d8d0c3] bg-white/80 p-5">
             <span className="mb-3 block text-sm font-semibold text-[#123524]">
-              Description
+            What is the problem?
             </span>
             <textarea
               name="description"
@@ -187,11 +196,11 @@ export default function ReportPage() {
               Field note
             </p>
             <p className="mt-3 font-display text-4xl leading-none">
-              Make the issue obvious.
+              Make the problem obvious.
             </p>
             <p className="mt-3 text-sm leading-6 text-[#d9e7de]">
               A strong photo and a precise description help the scoring model
-              estimate effort fairly and help fixers understand the job fast.
+              estimate effort fairly and help volunteers understand the task fast.
             </p>
           </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, Sparkles } from "lucide-react";
+import { LogOut, ShieldCheck, Sparkles } from "lucide-react";
 
 import { BottomNav, appLinks } from "@/components/bottom-nav";
 import { useAuth } from "@/components/auth-provider";
@@ -20,7 +20,11 @@ export function AppShell({
 }) {
   const { isAdmin, profile, signOutUser, user } = useAuth();
   const pathname = usePathname();
-  const links = appLinks.filter((link) => link.href !== "/admin" || isAdmin);
+  const links = [...appLinks];
+
+  if (isAdmin) {
+    links.push({ href: "/admin", label: "Moderation", icon: ShieldCheck });
+  }
 
   return (
     <div className="min-h-screen px-3 py-3 md:px-5 md:py-5">
@@ -38,20 +42,7 @@ export function AppShell({
               CleanMerit
             </Link>
 
-            <div className="mt-8 rounded-[28px] bg-[#123524] p-5 text-[#f7f1e7] shadow-[0_18px_50px_rgba(18,53,36,0.22)]">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-[#d2e1d7]">
-                Community repair network
-              </p>
-              <p className="mt-3 font-display text-4xl leading-none">
-                Laptop-ready field operations.
-              </p>
-              <p className="mt-3 text-sm leading-6 text-[#d9e7de]">
-                Review live hazards, coordinate repairs, and track reward points
-                in a full website workspace.
-              </p>
-            </div>
-
-            <nav aria-label="Primary" className="mt-6 space-y-2">
+            <nav aria-label="Primary" className="mt-8 space-y-2">
               {links.map(({ href, icon: Icon, label }) => {
                 const active =
                   pathname === href || (href !== "/" && pathname.startsWith(href));
