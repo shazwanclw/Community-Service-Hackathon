@@ -14,15 +14,37 @@ function extractJson(raw: string) {
     return trimmed.replace(/^```(?:json)?\s*/i, "").replace(/```$/i, "").trim();
   }
 
+  const objectStart = trimmed.indexOf("{");
+  const objectEnd = trimmed.lastIndexOf("}");
+
+  if (objectStart >= 0 && objectEnd > objectStart) {
+    return trimmed.slice(objectStart, objectEnd + 1);
+  }
+
   return trimmed;
+}
+
+function readScore(
+  parsed: Record<string, unknown>,
+  ...keys: string[]
+) {
+  for (const key of keys) {
+    const value = Number(parsed[key]);
+
+    if (!Number.isNaN(value)) {
+      return clampScore(value);
+    }
+  }
+
+  return Number.NaN;
 }
 
 export function parseGeminiHazardScore(raw: string): HazardScore {
   const parsed = JSON.parse(extractJson(raw)) as Record<string, unknown>;
 
-  const size = clampScore(Number(parsed.size_score));
-  const hazard = clampScore(Number(parsed.hazard_score));
-  const effort = clampScore(Number(parsed.effort_score));
+  const size = readScore(parsed, "size_score", "sizeScore", "size");
+  const hazard = readScore(parsed, "hazard_score", "hazardScore", "hazard");
+  const effort = readScore(parsed, "effort_score", "effortScore", "effort");
 
   if ([size, hazard, effort].some((value) => Number.isNaN(value))) {
     throw new Error("Gemini response is missing hazard scores.");

@@ -3,23 +3,24 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ClipboardPlus,
-  ListTodo,
-  LayoutList,
-  Medal,
+  ChartColumnBig,
+  CirclePlus,
+  ClipboardList,
+  House,
   ShieldCheck,
-  UserRound,
+  TriangleAlert,
+  User,
 } from "lucide-react";
 
 import { useAuth } from "@/components/auth-provider";
 
 export const appLinks = [
-  { href: "/", label: "Home", icon: LayoutList },
-  { href: "/report", label: "Report", icon: ClipboardPlus },
-  { href: "/issues", label: "Issues", icon: ShieldCheck },
-  { href: "/tasks", label: "Tasks", icon: ListTodo },
-  { href: "/leaderboard", label: "Leaderboard", icon: Medal },
-  { href: "/profile", label: "Profile", icon: UserRound },
+  { href: "/", label: "Home", icon: House },
+  { href: "/report", label: "Report", icon: CirclePlus },
+  { href: "/issues", label: "Issues", icon: TriangleAlert },
+  { href: "/tasks", label: "Tasks", icon: ClipboardList },
+  { href: "/leaderboard", label: "Leaderboard", icon: ChartColumnBig },
+  { href: "/profile", label: "Profile", icon: User },
 ];
 
 export function BottomNav() {
@@ -34,9 +35,9 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Primary"
-      className="sticky bottom-0 z-20 border-t border-white/60 bg-[rgba(247,241,231,0.95)] backdrop-blur lg:hidden"
+      className="sticky bottom-0 z-20 border-t border-[#cdb39d] bg-[#f8f4ea] lg:hidden"
     >
-      <div className="flex gap-2 overflow-x-auto px-3 py-2">
+      <div className="flex gap-2 overflow-x-auto px-3 py-2.5">
         {links.map(({ href, icon: Icon, label }) => {
           const active =
             pathname === href || (href !== "/" && pathname.startsWith(href));
@@ -45,10 +46,10 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex min-w-[88px] flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs font-semibold transition ${
+              className={`flex min-w-[88px] flex-col items-center gap-1 rounded-[18px] px-3 py-2 text-[11px] font-semibold transition ${
                 active
-                  ? "bg-[#123524] text-[#f7f1e7]"
-                  : "text-[#47624b] hover:bg-white/70"
+                  ? "bg-[#8e0d0d] text-[#fff8f4]"
+                  : "text-[#7b1917] hover:bg-white/70"
               }`}
             >
               <Icon className="h-4 w-4" />

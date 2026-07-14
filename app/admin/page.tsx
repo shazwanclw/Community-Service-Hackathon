@@ -131,20 +131,20 @@ export default function AdminPage() {
 
       {loading ? (
         <div className="flex min-h-[280px] items-center justify-center">
-          <LoaderCircle className="h-8 w-8 animate-spin text-[#47624b]" />
+          <LoaderCircle className="h-8 w-8 animate-spin text-[#8e0d0d]" />
         </div>
       ) : !loadError && issues.length ? (
-        <div className="space-y-4">
+        <div className="space-y-4 px-5 py-5 md:px-8">
           {issues.map((issue) => (
             <article
               key={issue.id}
-              className="rounded-[30px] border border-[#d8d0c3] bg-white p-5 shadow-[0_18px_40px_rgba(18,53,36,0.08)]"
+              className="rounded-[22px] border border-[#dfcec0] bg-white p-5 shadow-[0_12px_30px_rgba(77,28,25,0.06)]"
             >
               <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_320px]">
                 <div>
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     <div>
-                      <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-[#47624b]">
+                      <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-[#8d6d63]">
                         Before
                       </p>
                       <div className="relative aspect-[4/3] overflow-hidden rounded-[22px] bg-[#e9e0d2]">
@@ -159,7 +159,7 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-[#47624b]">
+                      <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-[#8d6d63]">
                         After
                       </p>
                       <div className="relative aspect-[4/3] overflow-hidden rounded-[22px] bg-[#e9e0d2]">
@@ -176,31 +176,31 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  <p className="mt-4 text-sm leading-6 text-[#2c4633]">
+                  <p className="mt-4 text-sm leading-6 text-[#5d4844]">
                     {issue.description}
                   </p>
                 </div>
 
-                <div className="flex flex-col justify-between rounded-[26px] bg-[#f8f2e8] p-5">
+                <div className="flex flex-col justify-between rounded-[18px] bg-[#fbf6ef] p-5">
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#47624b]">
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#8d6d63]">
                       Moderation action
                     </p>
-                    <p className="mt-3 text-sm leading-6 text-[#47624b]">
+                    <p className="mt-3 text-sm leading-6 text-[#6d5752]">
                       Release points only if the repair is complete and the
                       after-photo evidence clearly resolves the issue.
                     </p>
                   </div>
 
                   <div className="mt-5 flex items-center justify-between gap-3">
-                    <span className="rounded-full bg-[#f4a261]/18 px-3 py-1 text-sm font-bold text-[#8f4b11]">
+                    <span className="rounded-full bg-[#fff1ea] px-3 py-1 text-sm font-bold text-[#8e0d0d]">
                       {issue.point_value} pts
                     </span>
                     <button
                       type="button"
                       onClick={() => void approveIssue(issue.id)}
                       disabled={approvingId === issue.id}
-                      className="inline-flex items-center gap-2 rounded-full bg-[#123524] px-4 py-3 text-sm font-semibold text-[#f7f1e7] disabled:opacity-70"
+                      className="inline-flex items-center gap-2 rounded-full bg-[#8e0d0d] px-4 py-3 text-sm font-semibold text-white disabled:opacity-70"
                     >
                       {approvingId === issue.id ? (
                         <LoaderCircle className="h-4 w-4 animate-spin" />
@@ -214,9 +214,9 @@ export default function AdminPage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-[30px] border border-dashed border-[#cbbfaa] bg-white/70 px-5 py-10 text-center">
-          <p className="font-display text-3xl text-[#123524]">Queue is clear</p>
-          <p className="mt-3 text-sm leading-6 text-[#47624b]">
+        <div className="mx-5 mt-5 rounded-[24px] border border-dashed border-[#d1b7a4] bg-white/70 px-5 py-10 text-center md:mx-8">
+          <p className="font-display text-3xl text-[#8e0d0d]">Queue is clear</p>
+          <p className="mt-3 text-sm leading-6 text-[#6d5752]">
             No pending repair submissions are waiting for moderation.
           </p>
         </div>

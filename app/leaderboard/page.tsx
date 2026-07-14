@@ -47,15 +47,15 @@ export default function LeaderboardPage() {
     >
       {loading ? (
         <div className="flex min-h-[280px] items-center justify-center">
-          <LoaderCircle className="h-8 w-8 animate-spin text-[#47624b]" />
+          <LoaderCircle className="h-8 w-8 animate-spin text-[#8e0d0d]" />
         </div>
       ) : error ? (
-        <div className="rounded-[26px] border border-[#f0b7b7] bg-[#fff1f1] px-4 py-3 text-sm text-[#a63f3f]">
+        <div className="mx-5 mt-5 rounded-[18px] border border-[#f0b7b7] bg-[#fff1f1] px-4 py-3 text-sm text-[#a63f3f] md:mx-8">
           {error}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-[30px] border border-[#d8d0c3] bg-white">
-          <div className="grid grid-cols-[80px_minmax(0,1fr)_140px] gap-4 border-b border-[#efe4d2] px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-[#6d7f71]">
+        <div className="mx-5 my-5 overflow-hidden rounded-[22px] border border-[#dfcec0] bg-white md:mx-8">
+          <div className="grid grid-cols-[80px_minmax(0,1fr)_140px] gap-4 border-b border-[#efe4d2] bg-[#fbf6ef] px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-[#8d6d63]">
             <div>Rank</div>
             <div>Member</div>
             <div>Points</div>
@@ -65,19 +65,19 @@ export default function LeaderboardPage() {
               <div
                 key={entry.id}
                 className={`grid grid-cols-[80px_minmax(0,1fr)_140px] gap-4 px-5 py-4 ${
-                  entry.id === user?.uid ? "bg-[#fff7eb]" : ""
+                  entry.id === user?.uid ? "bg-[#fff3ef]" : ""
                 }`}
               >
-                <div className="text-sm font-bold text-[#123524]">#{index + 1}</div>
+                <div className="text-sm font-bold text-[#8e0d0d]">#{index + 1}</div>
                 <div>
-                  <p className="text-sm font-semibold text-[#123524]">
+                  <p className="text-sm font-semibold text-[#321817]">
                     {entry.full_name || entry.email}
                   </p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[#6d7f71]">
+                  <p className="mt-1 text-xs uppercase tracking-[0.18em] text-[#8d6d63]">
                     {entry.email}
                   </p>
                 </div>
-                <div className="text-sm font-bold text-[#8f4b11]">
+                <div className="text-sm font-bold text-[#8e0d0d]">
                   {entry.total_points}
                 </div>
               </div>

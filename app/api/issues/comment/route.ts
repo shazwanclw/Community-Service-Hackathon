@@ -29,11 +29,18 @@ export async function POST(request: Request) {
 
     const issue = snapshot.data() as IssueRecord;
     const comments = issue.comments ?? [];
+    const userSnapshot = await adminDb.collection("users").doc(decodedToken.uid).get();
+    const userProfile = userSnapshot.exists ? userSnapshot.data() : null;
     const comment: IssueComment = {
       id: createCommentId(),
       text,
       user_id: decodedToken.uid,
-      user_name: decodedToken.name ?? decodedToken.email ?? "Community member",
+      user_name:
+        userProfile?.username?.trim() ||
+        userProfile?.full_name?.trim() ||
+        decodedToken.name ||
+        decodedToken.email ||
+        "Community member",
       created_at_iso: new Date().toISOString(),
     };
 

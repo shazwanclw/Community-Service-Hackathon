@@ -1,43 +1,33 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { collection, onSnapshot } from "firebase/firestore";
-import { LoaderCircle } from "lucide-react";
+import { Eye, Funnel, LoaderCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { useAuth } from "@/components/auth-provider";
-import { db } from "@/lib/firebase";
+import { IssuePreviewModal } from "@/components/issue-preview-modal";
 import { postAuthedJson } from "@/lib/client-api";
+import { db } from "@/lib/firebase";
 import { getIssueView } from "@/lib/issue-lifecycle";
+import { getDisplayName, getIssueBeforePhotoUrls } from "@/lib/profile-display";
 import { IssueRecord } from "@/lib/types";
 import { useLiveNow } from "@/lib/use-live-now";
 
-type SortMode = "newest" | "points" | "available" | "claimed";
+type SortMode = "newest" | "points";
+type StatusFilter = "all" | "active" | "waiting" | "resolved";
 
 function sortIssues(
   issues: IssueRecord[],
   sortMode: SortMode,
-  nowMs: number,
-  viewerId?: string,
 ) {
   const next = [...issues];
 
   next.sort((a, b) => {
     if (sortMode === "points") {
       return b.point_value - a.point_value;
-    }
-
-    if (sortMode === "available") {
-      const aAvailable = getIssueView(a, nowMs, viewerId).phase === "available" ? 1 : 0;
-      const bAvailable = getIssueView(b, nowMs, viewerId).phase === "available" ? 1 : 0;
-      return bAvailable - aAvailable;
-    }
-
-    if (sortMode === "claimed") {
-      const aClaimed = getIssueView(a, nowMs, viewerId).phase === "claimed" ? 1 : 0;
-      const bClaimed = getIssueView(b, nowMs, viewerId).phase === "claimed" ? 1 : 0;
-      return bClaimed - aClaimed;
     }
 
     const aMillis = a.created_at?.toMillis?.() ?? 0;
@@ -55,7 +45,10 @@ export default function IssuesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [filterOpen, setFilterOpen] = useState(false);
   const [busyIssueId, setBusyIssueId] = useState<string | null>(null);
+  const [previewIssue, setPreviewIssue] = useState<IssueRecord | null>(null);
   const nowMs = useLiveNow();
 
   useEffect(() => {
@@ -79,10 +72,23 @@ export default function IssuesPage() {
     );
   }, []);
 
-  const sortedIssues = useMemo(
-    () => sortIssues(issues, sortMode, nowMs, user?.uid),
-    [issues, nowMs, sortMode, user?.uid],
-  );
+  const sortedIssues = useMemo(() => {
+    const filtered = issues.filter((issue) => {
+      const view = getIssueView(issue, nowMs, user?.uid);
+      if (statusFilter === "active") {
+        return view.phase === "available" || view.phase === "claimed";
+      }
+      if (statusFilter === "waiting") {
+        return view.phase === "pending_review";
+      }
+      if (statusFilter === "resolved") {
+        return view.phase === "resolved";
+      }
+      return true;
+    });
+
+    return sortIssues(filtered, sortMode);
+  }, [issues, nowMs, sortMode, statusFilter, user?.uid]);
 
   async function handleClaim(issueId: string) {
     if (!user) {
@@ -105,94 +111,199 @@ export default function IssuesPage() {
 
   return (
     <AppShell
-      title="Issue Board"
-      subtitle="Scan the full list of reported problems, sort by reward value or availability, and pick the task that fits you best."
+      title="Issues Board"
+      subtitle="Browse all reported issues in one place and filter the list when you need a faster scan."
       actions={
-        <select
-          value={sortMode}
-          onChange={(event) => setSortMode(event.target.value as SortMode)}
-          className="rounded-full border border-[#d8d0c3] bg-white/85 px-4 py-3 text-sm font-semibold text-[#123524]"
-        >
-          <option value="newest">Newest first</option>
-          <option value="points">Highest points</option>
-          <option value="available">Available first</option>
-          <option value="claimed">Claimed first</option>
-        </select>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setFilterOpen((current) => !current)}
+            className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white px-4 py-3 text-sm font-semibold text-[#8e0d0d]"
+          >
+            <Funnel className="h-4 w-4" />
+            Filter
+          </button>
+
+          {filterOpen ? (
+            <div className="absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-[220px] rounded-[16px] border border-[#dfcec0] bg-white p-2 shadow-[0_18px_48px_rgba(77,28,25,0.12)]">
+              {[
+                { value: "newest", label: "Newest first" },
+                { value: "points", label: "Highest points" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    setSortMode(option.value as SortMode);
+                    setFilterOpen(false);
+                  }}
+                  className={`block w-full rounded-[12px] px-3 py-2 text-left text-sm ${
+                    sortMode === option.value
+                      ? "bg-[#f9ece4] font-semibold text-[#8e0d0d]"
+                      : "text-[#5d4844] hover:bg-[#fbf6ef]"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+              <div className="my-2 border-t border-[#efe4d2]" />
+              {[
+                { value: "all", label: "All issues" },
+                { value: "active", label: "Active and open" },
+                { value: "waiting", label: "Waiting review" },
+                { value: "resolved", label: "Resolved" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    setStatusFilter(option.value as StatusFilter);
+                    setFilterOpen(false);
+                  }}
+                  className={`block w-full rounded-[12px] px-3 py-2 text-left text-sm ${
+                    statusFilter === option.value
+                      ? "bg-[#f9ece4] font-semibold text-[#8e0d0d]"
+                      : "text-[#5d4844] hover:bg-[#fbf6ef]"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
       }
     >
       {error ? (
-        <div className="mb-5 rounded-[26px] border border-[#f0b7b7] bg-[#fff1f1] px-4 py-3 text-sm text-[#a63f3f]">
+        <div className="mx-5 mt-5 rounded-[18px] border border-[#f0b7b7] bg-[#fff1f1] px-4 py-3 text-sm text-[#a63f3f] md:mx-8">
           {error}
         </div>
       ) : null}
 
       {loading ? (
         <div className="flex min-h-[280px] items-center justify-center">
-          <LoaderCircle className="h-8 w-8 animate-spin text-[#47624b]" />
+          <LoaderCircle className="h-8 w-8 animate-spin text-[#8e0d0d]" />
         </div>
       ) : (
-        <div className="overflow-hidden rounded-[30px] border border-[#d8d0c3] bg-white">
-          <div className="grid grid-cols-[minmax(0,1.8fr)_130px_140px_170px] gap-4 border-b border-[#efe4d2] px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-[#6d7f71]">
-            <div>Issue</div>
-            <div>Points</div>
-            <div>Status</div>
-            <div>Action</div>
-          </div>
+        <div className="px-5 py-5 md:px-8">
+          <div className="overflow-hidden rounded-[22px] border border-[#dfcec0] bg-white">
+            <div className="hidden grid-cols-[140px_minmax(0,1.8fr)_120px_120px_180px] gap-4 border-b border-[#efe4d2] bg-[#fbf6ef] px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-[#8d6d63] md:grid">
+              <div>Reporter</div>
+              <div>Issue</div>
+              <div>Photos</div>
+              <div>Points</div>
+              <div>Action</div>
+            </div>
 
-          <div className="divide-y divide-[#efe4d2]">
-            {sortedIssues.map((issue) => {
-              const view = getIssueView(issue, nowMs, user?.uid);
+            <div className="divide-y divide-[#efe4d2]">
+              {sortedIssues.map((issue) => {
+                const view = getIssueView(issue, nowMs, user?.uid);
+                const imageUrls = getIssueBeforePhotoUrls(issue);
+                const displayName = getDisplayName({
+                  fullName: issue.reporter_name,
+                  username: issue.reporter_username,
+                });
 
-              return (
-                <div
-                  key={issue.id}
-                  className="grid grid-cols-1 gap-4 px-5 py-5 md:grid-cols-[minmax(0,1.8fr)_130px_140px_170px]"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-[#123524]">
-                      {issue.description}
-                    </p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.18em] text-[#6d7f71]">
-                      {issue.reporter_name ?? "Community member"}
-                    </p>
-                  </div>
-                  <div className="text-sm font-bold text-[#8f4b11]">
-                    {issue.point_value} pts
-                  </div>
-                  <div className="text-sm font-semibold text-[#123524]">
-                    {view.statusLabel}
-                  </div>
-                  <div>
-                    {view.canClaim ? (
+                return (
+                  <div
+                    key={issue.id}
+                    className="grid grid-cols-1 gap-4 px-5 py-5 md:grid-cols-[140px_minmax(0,1.8fr)_120px_120px_180px]"
+                  >
+                    <div className="text-sm font-semibold text-[#321817]">{displayName}</div>
+
+                    <div className="min-w-0">
+                      <p className="line-clamp-2 text-sm text-[#321817]">{issue.description}</p>
+                      {issue.location ? (
+                        <p className="mt-2 text-sm text-[#7c6761]">{issue.location}</p>
+                      ) : null}
+                      <p className="mt-2 text-xs uppercase tracking-[0.16em] text-[#8d6d63]">
+                        {view.statusLabel}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {imageUrls.slice(0, 3).map((imageUrl, index) => (
+                        <div
+                          key={`${issue.id}-image-${index}`}
+                          className="relative h-14 w-14 overflow-hidden rounded-[12px] bg-[#eadfd6]"
+                        >
+                          <Image
+                            src={imageUrl}
+                            alt={`${issue.description} ${index + 1}`}
+                            fill
+                            className="object-cover"
+                            sizes="56px"
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="text-sm font-bold text-[#8e0d0d]">{issue.point_value} pts</div>
+
+                    <div className="flex flex-wrap gap-2">
                       <button
                         type="button"
-                        onClick={() => void handleClaim(issue.id)}
-                        disabled={busyIssueId === issue.id}
-                        className="inline-flex items-center gap-2 rounded-full bg-[#123524] px-4 py-2 text-sm font-semibold text-[#f7f1e7] disabled:opacity-60"
+                        onClick={() => setPreviewIssue(issue)}
+                        className="inline-flex items-center gap-2 rounded-full border border-[#d8c4b2] bg-[#fffaf6] px-4 py-2 text-sm font-semibold text-[#8e0d0d]"
                       >
-                        {busyIssueId === issue.id ? (
-                          <LoaderCircle className="h-4 w-4 animate-spin" />
-                        ) : null}
-                        Take task
+                        <Eye className="h-4 w-4" />
+                        View
                       </button>
-                    ) : view.canSubmitProof ? (
-                      <button
-                        type="button"
-                        onClick={() => router.push(`/issues/${issue.id}/fix`)}
-                        className="rounded-full border border-[#123524] px-4 py-2 text-sm font-semibold text-[#123524]"
-                      >
-                        Continue
-                      </button>
-                    ) : (
-                      <span className="text-sm text-[#6d7f71]">Watch</span>
-                    )}
+                      {view.canClaim ? (
+                        <button
+                          type="button"
+                          onClick={() => void handleClaim(issue.id)}
+                          disabled={busyIssueId === issue.id}
+                          className="inline-flex items-center gap-2 rounded-full bg-[#8e0d0d] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                        >
+                          {busyIssueId === issue.id ? (
+                            <LoaderCircle className="h-4 w-4 animate-spin" />
+                          ) : null}
+                          Take task
+                        </button>
+                      ) : view.canSubmitProof ? (
+                        <button
+                          type="button"
+                          onClick={() => router.push(`/issues/${issue.id}/fix`)}
+                          className="rounded-full border border-[#8e0d0d] px-4 py-2 text-sm font-semibold text-[#8e0d0d]"
+                        >
+                          Continue
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
+                );
+              })}
+
+              {!sortedIssues.length ? (
+                <div className="px-5 py-10 text-center">
+                  <p className="font-display text-3xl text-[#8e0d0d]">No issues yet</p>
+                  <p className="mt-3 text-sm leading-6 text-[#6d5752]">
+                    New community reports will appear here.
+                  </p>
                 </div>
-              );
-            })}
+              ) : null}
+            </div>
           </div>
         </div>
       )}
+
+      {previewIssue ? (
+        <IssuePreviewModal
+          beforePhotoUrl={getIssueBeforePhotoUrls(previewIssue)[0]}
+          description={previewIssue.description}
+          onClose={() => setPreviewIssue(null)}
+          pointValue={previewIssue.point_value}
+          reporterName={
+            getDisplayName({
+              fullName: previewIssue.reporter_name,
+              username: previewIssue.reporter_username,
+            })
+          }
+          statusLabel={getIssueView(previewIssue, nowMs, user?.uid).statusLabel}
+          title="Issue details"
+        />
+      ) : null}
     </AppShell>
   );
 }

@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { collection, onSnapshot } from "firebase/firestore";
-import { ArrowRight, LoaderCircle } from "lucide-react";
+import { FirestoreError, collection, onSnapshot } from "firebase/firestore";
+import { LoaderCircle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
@@ -45,9 +44,11 @@ export default function HomePage() {
         setError(null);
         setLoading(false);
       },
-      () => {
+      (snapshotError: FirestoreError) => {
         setIssues([]);
-        setError("Unable to load the live issue feed right now.");
+        setError(
+          snapshotError.message || "Unable to load the live issue feed right now.",
+        );
         setLoading(false);
       },
     );
@@ -85,35 +86,28 @@ export default function HomePage() {
 
   return (
     <AppShell
-      title="Community Feed"
-      subtitle="Scroll through reported problems like a live neighborhood feed, react to updates, and pick a task when you are ready to fix it."
+      title="Home Board"
+      subtitle="Stay connected with your community by exploring the latest posts, events, and accomplishments."
       actions={
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-          <Link
-            href="/report"
-            className="inline-flex items-center gap-2 rounded-full bg-[#f4a261] px-4 py-3 text-sm font-semibold text-[#123524] shadow-[0_10px_30px_rgba(244,162,97,0.25)]"
-          >
-            Report a problem
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-          <div className="rounded-full border border-[#d4c6b0] bg-white/85 px-4 py-3 text-sm font-semibold text-[#47624b]">
+          <div className="rounded-full border border-white/35 bg-white px-4 py-3 text-sm font-semibold text-[#321817]">
             {availableCount} tasks available
           </div>
         </div>
       }
     >
       {error ? (
-        <div className="mb-5 rounded-[26px] border border-[#f0b7b7] bg-[#fff1f1] px-4 py-3 text-sm text-[#a63f3f]">
+        <div className="mx-5 mt-5 rounded-[18px] border border-[#f0b7b7] bg-[#fff1f1] px-4 py-3 text-sm text-[#a63f3f] md:mx-8">
           {error}
         </div>
       ) : null}
 
       {loading ? (
         <div className="flex min-h-[280px] items-center justify-center">
-          <LoaderCircle className="h-8 w-8 animate-spin text-[#47624b]" />
+          <LoaderCircle className="h-8 w-8 animate-spin text-[#8e0d0d]" />
         </div>
       ) : issues.length ? (
-        <div className="mx-auto grid max-w-[820px] gap-6">
+        <div className="mx-auto max-w-[920px] bg-white pb-10 pt-2">
           {issues.map((issue) => (
             <IssueCard
               key={issue.id}
@@ -155,9 +149,9 @@ export default function HomePage() {
           ))}
         </div>
       ) : (
-        <div className="rounded-[30px] border border-dashed border-[#cbbfaa] bg-white/70 px-5 py-10 text-center">
-          <p className="font-display text-3xl text-[#123524]">No reports yet</p>
-          <p className="mt-3 text-sm leading-6 text-[#47624b]">
+        <div className="mx-5 mt-5 rounded-[24px] border border-dashed border-[#d1b7a4] bg-[#fffdf8] px-5 py-10 text-center md:mx-8">
+          <p className="font-display text-3xl text-[#8e0d0d]">No reports yet</p>
+          <p className="mt-3 text-sm leading-6 text-[#6d5752]">
             Be the first person to report a cleanup problem in the area.
           </p>
         </div>

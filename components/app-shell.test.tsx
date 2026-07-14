@@ -24,11 +24,11 @@ describe("AppShell", () => {
     pathnameState.value = "/";
   });
 
-  it("renders a desktop-style navigation shell around page content", () => {
+  it("renders the mymentari board shell with brand, sidebar navigation, and board header", () => {
     render(
       <AppShell
-        title="Mentari Feed"
-        subtitle="Browse open hazards across the district."
+        title="Report Board"
+        subtitle="Submit a report and help keep the neighborhood clean."
       >
         <div>Body content</div>
       </AppShell>,
@@ -41,6 +41,9 @@ describe("AppShell", () => {
       screen.getAllByRole("navigation", { name: /primary/i }).length,
     ).toBeGreaterThan(0);
     expect(screen.getByRole("main")).toHaveTextContent("Body content");
-    expect(screen.getByText("Mentari Feed")).toBeInTheDocument();
+    expect(screen.getAllByText("MyMentari").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Home").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Report").length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: "Report Board" })).toBeInTheDocument();
   });
 });

@@ -46,7 +46,9 @@ export default function AuthPage() {
         await setDoc(doc(db, "users", credential.user.uid), {
           email,
           full_name: fullName,
+          profile_photo_url: null,
           total_points: 0,
+          username: null,
         });
       } else {
         await signInWithEmailAndPassword(auth, email, password);
@@ -65,47 +67,42 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-5 md:px-6 md:py-8">
-      <div className="mx-auto max-w-[1240px]">
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[#47624b]"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to feed
-        </Link>
-
-        <div className="grid overflow-hidden rounded-[34px] border border-white/70 bg-[rgba(255,250,241,0.9)] shadow-[0_24px_80px_rgba(18,53,36,0.12)] lg:grid-cols-[minmax(320px,0.9fr)_minmax(0,1.1fr)]">
-          <section className="hidden bg-[#123524] p-8 text-[#f7f1e7] lg:block">
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#d2e1d7]">
-              Desa Mentari access
-            </p>
-            <h1 className="mt-4 font-display text-6xl leading-none">
-              Clean streets need a shared dashboard.
+    <div className="min-h-screen bg-[#f2f0f3] px-4 py-8 md:px-6">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-[1180px] items-center justify-center gap-0 overflow-hidden border border-[#cdb39d] bg-[#f8f4ea] shadow-[0_18px_48px_rgba(77,28,25,0.08)]">
+        <div className="hidden h-full min-h-[680px] w-[44%] flex-col justify-between border-r border-[#bda28a] bg-[#fbf8ef] p-6 lg:flex">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#9d2b23] bg-white px-3 py-2 text-[14px] font-bold text-[#8f100d]">
+              MyMentari
+            </div>
+            <h1 className="mt-10 font-display text-5xl leading-none text-[#8e0d0d]">
+              Community boards that look and feel connected.
             </h1>
-            <p className="mt-4 max-w-md text-sm leading-7 text-[#d9e7de]">
-              Sign in to report hazards, claim fixes, and build a verified
-              reward history across the neighborhood network.
+            <p className="mt-4 max-w-md text-base leading-7 text-[#6d5752]">
+              Log in to submit reports, claim tasks, and track the improvements happening around the neighborhood.
             </p>
-          </section>
+          </div>
+        </div>
 
-          <section className="p-6 md:p-8">
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#47624b] lg:hidden">
-              Desa Mentari access
-            </p>
-            <h1 className="mt-3 font-display text-4xl leading-none text-[#123524]">
-              {mode === "login" ? "Welcome back" : "Join the cleanup crew"}
+        <div className="w-full max-w-[520px] px-6 py-10">
+          <Link
+            href="/"
+            className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-[#7b1917]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to feed
+          </Link>
+
+          <div className="rounded-[24px] border border-[#d9c6b6] bg-[rgba(255,250,241,0.96)] p-6 md:p-8">
+            <h1 className="font-display text-4xl leading-none text-[#8e0d0d]">
+              {mode === "login" ? "Log In" : "Create Account"}
             </h1>
-            <p className="mt-3 text-sm leading-6 text-[#47624b]">
-              Log in to report hazards, submit repairs, and track your points.
-            </p>
 
-            <div className="mt-6 grid grid-cols-2 gap-2 rounded-full bg-[#ebe1d1] p-1">
+            <div className="mt-6 grid grid-cols-2 gap-2 rounded-full bg-[#efe5da] p-1">
               <button
                 type="button"
                 onClick={() => setMode("login")}
                 className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
-                  mode === "login" ? "bg-white text-[#123524]" : "text-[#6d7f71]"
+                  mode === "login" ? "bg-white text-[#8e0d0d]" : "text-[#8d6d63]"
                 }`}
               >
                 Log In
@@ -114,7 +111,7 @@ export default function AuthPage() {
                 type="button"
                 onClick={() => setMode("signup")}
                 className={`rounded-full px-4 py-3 text-sm font-semibold transition ${
-                  mode === "signup" ? "bg-white text-[#123524]" : "text-[#6d7f71]"
+                  mode === "signup" ? "bg-white text-[#8e0d0d]" : "text-[#8d6d63]"
                 }`}
               >
                 Sign Up
@@ -127,34 +124,34 @@ export default function AuthPage() {
             >
               {mode === "signup" ? (
                 <label className="block">
-                  <span className="mb-2 block text-sm font-semibold text-[#123524]">
+                  <span className="mb-2 block text-sm font-semibold text-[#321817]">
                     Full name
                   </span>
                   <input
                     name="fullName"
                     type="text"
                     required
-                    className="w-full rounded-3xl border border-[#d8d0c3] bg-white px-4 py-3 text-sm text-[#123524]"
+                    className="w-full rounded-3xl border border-[#d8c4b2] bg-white px-4 py-3 text-sm text-[#321817]"
                     placeholder="Aina Rahman"
                   />
                 </label>
               ) : null}
 
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-[#123524]">
+                <span className="mb-2 block text-sm font-semibold text-[#321817]">
                   Email
                 </span>
                 <input
                   name="email"
                   type="email"
                   required
-                  className="w-full rounded-3xl border border-[#d8d0c3] bg-white px-4 py-3 text-sm text-[#123524]"
+                  className="w-full rounded-3xl border border-[#d8c4b2] bg-white px-4 py-3 text-sm text-[#321817]"
                   placeholder="you@example.com"
                 />
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm font-semibold text-[#123524]">
+                <span className="mb-2 block text-sm font-semibold text-[#321817]">
                   Password
                 </span>
                 <input
@@ -162,7 +159,7 @@ export default function AuthPage() {
                   type="password"
                   minLength={6}
                   required
-                  className="w-full rounded-3xl border border-[#d8d0c3] bg-white px-4 py-3 text-sm text-[#123524]"
+                  className="w-full rounded-3xl border border-[#d8c4b2] bg-white px-4 py-3 text-sm text-[#321817]"
                   placeholder="At least 6 characters"
                 />
               </label>
@@ -176,13 +173,13 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#123524] px-4 py-3 text-sm font-semibold text-[#f7f1e7] disabled:opacity-70"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#8e0d0d] px-4 py-3 text-sm font-semibold text-white disabled:opacity-70"
               >
                 {loading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
                 {mode === "login" ? "Log In" : "Create Account"}
               </button>
             </form>
-          </section>
+          </div>
         </div>
       </div>
     </div>

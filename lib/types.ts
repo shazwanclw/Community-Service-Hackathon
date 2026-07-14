@@ -5,7 +5,9 @@ export type IssueStatus = "open" | "pending" | "approved";
 export type UserProfile = {
   email: string;
   full_name: string;
+  profile_photo_url?: string | null;
   total_points: number;
+  username?: string | null;
 };
 
 export type IssueComment = {
@@ -17,6 +19,7 @@ export type IssueComment = {
 };
 
 export type IssueExtensionStatus = "none" | "requested" | "approved" | "rejected";
+export type IssueCategory = "cleanliness" | "facility" | "safety" | "others";
 
 export type IssueRecord = {
   id: string;
@@ -24,11 +27,16 @@ export type IssueRecord = {
   fixer_id?: string | null;
   status: IssueStatus;
   description: string;
+  location?: string | null;
+  category?: IssueCategory | null;
   before_photo_url: string;
+  before_photo_urls?: string[] | null;
   after_photo_url?: string | null;
   point_value: number;
   created_at?: Timestamp | null;
   reporter_name?: string | null;
+  reporter_profile_photo_url?: string | null;
+  reporter_username?: string | null;
   claim_expires_at_ms?: number | null;
   claimed_at_ms?: number | null;
   extension_status?: IssueExtensionStatus | null;

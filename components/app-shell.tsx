@@ -27,22 +27,22 @@ export function AppShell({
   }
 
   return (
-    <div className="min-h-screen px-3 py-3 md:px-5 md:py-5">
-      <div className="mx-auto flex min-h-[calc(100vh-1.5rem)] max-w-[1480px] overflow-hidden rounded-[34px] border border-white/70 bg-[rgba(247,241,231,0.85)] shadow-[0_30px_120px_rgba(18,53,36,0.12)] backdrop-blur">
+    <div className="min-h-screen bg-[#f2f0f3] py-2 pr-2 md:py-4 md:pr-4">
+      <div className="ml-0 flex min-h-[calc(100vh-1rem)] max-w-[1320px] overflow-hidden border border-[#cdb39d] bg-[#f8f4ea] shadow-[0_18px_48px_rgba(77,28,25,0.08)]">
         <aside
           aria-label="Primary"
-          className="hidden w-[310px] shrink-0 flex-col justify-between border-r border-[#d8d0c3] bg-[linear-gradient(180deg,rgba(255,250,241,0.96)_0%,rgba(244,238,227,0.94)_100%)] p-6 lg:flex"
+          className="hidden min-h-full w-[208px] shrink-0 flex-col justify-between border-r border-[#bda28a] bg-[#fbf8ef] lg:flex"
         >
-          <div>
+          <div className="p-4">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 rounded-full border border-[#cbbfaa] bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.24em] text-[#47624b]"
+              className="inline-flex items-center gap-2 rounded-full border border-[#9d2b23] bg-white px-3 py-2 text-[14px] font-bold text-[#8f100d]"
             >
               <Sparkles className="h-3.5 w-3.5" />
-              CleanMerit
+              MyMentari
             </Link>
 
-            <nav aria-label="Primary" className="mt-8 space-y-2">
+            <nav aria-label="Primary" className="mt-11 space-y-2">
               {links.map(({ href, icon: Icon, label }) => {
                 const active =
                   pathname === href || (href !== "/" && pathname.startsWith(href));
@@ -51,13 +51,18 @@ export function AppShell({
                   <Link
                     key={href}
                     href={href}
-                    className={`flex items-center gap-3 rounded-[22px] px-4 py-3 text-sm font-semibold transition ${
+                    aria-current={active ? "page" : undefined}
+                    className={`flex items-center gap-3 rounded-full px-4 py-3 text-[15px] font-semibold transition ${
                       active
-                        ? "bg-[#123524] text-[#f7f1e7] shadow-[0_14px_30px_rgba(18,53,36,0.18)]"
-                        : "text-[#345341] hover:bg-white/80"
+                        ? "bg-[#8e0d0d] text-[#fff8f4]"
+                        : "text-[#7b1917] hover:bg-[#f5efe3]"
                     }`}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon
+                      className={`h-4 w-4 ${
+                        active ? "text-[#fff8f4]" : "text-[#7b1917]"
+                      }`}
+                    />
                     <span>{label}</span>
                   </Link>
                 );
@@ -65,84 +70,70 @@ export function AppShell({
             </nav>
           </div>
 
-          <div className="space-y-4">
-            <div className="rounded-[28px] border border-[#d8d0c3] bg-white/85 p-4">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-[#6d7f71]">
-                Active account
+          <div className="mt-auto border-t border-[#bda28a] p-4">
+            <div className="rounded-[24px] border border-[#d8c4b2] bg-[#fffdf8] p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8d6d63]">
+                Points
               </p>
-              <p className="mt-2 text-base font-semibold text-[#123524]">
-                {profile?.full_name ?? user?.email ?? "Community guest"}
+              <p className="mt-1 font-display text-3xl leading-none text-[#8e0d0d]">
+                {profile?.total_points ?? 0}
               </p>
-              <div className="mt-4 flex items-end justify-between gap-3">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#6d7f71]">
-                    Points
-                  </p>
-                  <p className="mt-1 font-display text-4xl leading-none text-[#123524]">
-                    {profile?.total_points ?? 0}
-                  </p>
-                </div>
-                {user ? (
-                  <button
-                    type="button"
-                    onClick={() => void signOutUser()}
-                    className="inline-flex items-center gap-2 rounded-full border border-[#cfbea5] bg-[#fffaf1] px-4 py-2 text-sm font-semibold text-[#123524] transition hover:bg-white"
-                    aria-label="Sign out"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Sign out
-                  </button>
-                ) : null}
-              </div>
             </div>
+            {user ? (
+              <button
+                type="button"
+                onClick={() => void signOutUser()}
+                className="mt-3 ml-auto inline-flex h-8 w-8 items-center justify-center rounded-full border border-[#d8c4b2] bg-[#fff7f1] text-[#7b1917]"
+                aria-label="Sign out"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
+            ) : null}
           </div>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="relative overflow-hidden border-b border-[#d8d0c3] px-5 pb-5 pt-6 md:px-8 md:pb-6 md:pt-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(244,162,97,0.24),_transparent_40%),radial-gradient(circle_at_top_right,_rgba(102,173,133,0.18),_transparent_32%)]" />
-            <div className="relative flex flex-wrap items-start justify-between gap-5">
+        <div className="flex min-w-0 flex-1 flex-col bg-white">
+          <header className="relative overflow-hidden border-b border-[#d8c4b2]">
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,#8d0f10_0%,#cb5f5e_56%,#fff4f4_100%)]" />
+            <div className="relative flex flex-wrap items-start justify-between gap-5 px-5 pb-7 pt-8 md:px-8 md:pb-8 md:pt-10">
               <div className="max-w-3xl">
                 <div className="flex items-center gap-3 lg:hidden">
                   <Link
                     href="/"
-                    className="inline-flex items-center gap-2 rounded-full border border-[#cbbfaa] bg-white/85 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.24em] text-[#47624b]"
+                    className="inline-flex items-center gap-2 rounded-full border border-[#9d2b23] bg-white px-3 py-2 text-[13px] font-bold text-[#8f100d]"
                   >
                     <Sparkles className="h-3.5 w-3.5" />
-                    CleanMerit
+                    MyMentari
                   </Link>
-                  <div className="rounded-full border border-[#d4c6b0] bg-white/85 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.24em] text-[#47624b]">
-                    Community ops
-                  </div>
                 </div>
 
-                <h1 className="mt-4 font-display text-4xl leading-none text-[#123524] md:text-5xl">
+                <h1 className="mt-4 font-display text-[44px] leading-none text-white md:text-[52px]">
                   {title}
                 </h1>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-[#47624b] md:text-[15px]">
+                <p className="mt-3 max-w-2xl text-[17px] font-semibold leading-6 text-[#fff4f3]">
                   {subtitle}
                 </p>
               </div>
 
               <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
                 {user ? (
-                  <div className="rounded-[24px] border border-[#d8d0c3] bg-white/80 px-4 py-3 lg:hidden">
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-[#6d7f71]">
+                  <div className="rounded-[18px] border border-white/25 bg-white/12 px-4 py-3 text-white backdrop-blur lg:hidden">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-white/80">
                       Active account
                     </p>
                     <div className="mt-2 flex items-center gap-6">
                       <div>
-                        <p className="text-sm font-semibold text-[#123524]">
+                        <p className="text-sm font-semibold text-white">
                           {profile?.full_name ?? user.email}
                         </p>
-                        <p className="text-xs text-[#6d7f71]">
+                        <p className="text-xs text-white/80">
                           {(profile?.total_points ?? 0).toString()} points
                         </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => void signOutUser()}
-                        className="inline-flex items-center gap-2 rounded-full border border-[#cfbea5] bg-white/90 px-4 py-2 text-sm font-semibold text-[#123524]"
+                        className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white px-4 py-2 text-sm font-semibold text-[#8e0d0d]"
                         aria-label="Sign out"
                       >
                         <LogOut className="h-4 w-4" />
@@ -157,7 +148,7 @@ export function AppShell({
             </div>
           </header>
 
-          <main className="flex-1 px-5 py-5 md:px-8 md:py-7">{children}</main>
+          <main className="flex-1 bg-white px-0 py-0">{children}</main>
           <BottomNav />
         </div>
       </div>
