@@ -107,7 +107,7 @@ export default function HomePage() {
           <LoaderCircle className="h-8 w-8 animate-spin text-[#8e0d0d]" />
         </div>
       ) : issues.length ? (
-        <div className="mx-auto max-w-[920px] bg-white pb-10 pt-2">
+        <div className="bg-white pb-10 pt-2">
           {issues.map((issue) => (
             <IssueCard
               key={issue.id}

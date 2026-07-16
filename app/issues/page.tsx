@@ -146,29 +146,6 @@ export default function IssuesPage() {
                   {option.label}
                 </button>
               ))}
-              <div className="my-2 border-t border-[#efe4d2]" />
-              {[
-                { value: "all", label: "All issues" },
-                { value: "active", label: "Active and open" },
-                { value: "waiting", label: "Waiting review" },
-                { value: "resolved", label: "Resolved" },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    setStatusFilter(option.value as StatusFilter);
-                    setFilterOpen(false);
-                  }}
-                  className={`block w-full rounded-[12px] px-3 py-2 text-left text-sm ${
-                    statusFilter === option.value
-                      ? "bg-[#f9ece4] font-semibold text-[#8e0d0d]"
-                      : "text-[#5d4844] hover:bg-[#fbf6ef]"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
             </div>
           ) : null}
         </div>
@@ -186,6 +163,32 @@ export default function IssuesPage() {
         </div>
       ) : (
         <div className="px-5 py-5 md:px-8">
+          <div className="mb-5 flex flex-wrap gap-3">
+            {[
+              { value: "all" as const, label: "All" },
+              { value: "active" as const, label: "Active claim" },
+              { value: "waiting" as const, label: "Waiting review" },
+              { value: "resolved" as const, label: "Completed" },
+            ].map((tab) => {
+              const active = tab.value === statusFilter;
+
+              return (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => setStatusFilter(tab.value)}
+                  className={`inline-flex items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold transition ${
+                    active
+                      ? "bg-[#8e0d0d] text-white"
+                      : "border border-[#d8c4b2] bg-[#fffdf8] text-[#7b1917]"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
           <div className="overflow-hidden rounded-[22px] border border-[#dfcec0] bg-white">
             <div className="hidden grid-cols-[140px_minmax(0,1.8fr)_120px_120px_180px] gap-4 border-b border-[#efe4d2] bg-[#fbf6ef] px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-[#8d6d63] md:grid">
               <div>Reporter</div>

@@ -238,7 +238,7 @@ export function IssueCard({
           </div>
 
           {comments.length ? (
-            <div className="mt-4 space-y-2 rounded-[18px] bg-[#fbf6ef] px-4 py-3">
+            <div className="mt-4 max-w-3xl space-y-2 rounded-[18px] bg-[#fbf6ef] px-4 py-3">
               {(commentsOpen ? comments : comments.slice(-3)).map((comment) => (
                 <div key={comment.id}>
                   <p className="text-sm font-semibold text-[#671010]">
@@ -286,7 +286,7 @@ export function IssueCard({
             {commentsOpen ? (
               <form
                 onSubmit={(event) => void handleCommentSubmit(event)}
-                className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row"
+                className="flex min-w-0 w-full max-w-3xl flex-col gap-2 sm:flex-row"
               >
                 <label className="sr-only" htmlFor={`comment-${issue.id}`}>
                   Add comment

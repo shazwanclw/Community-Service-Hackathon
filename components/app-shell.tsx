@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut, ShieldCheck, Sparkles } from "lucide-react";
+import { LogOut, ShieldCheck } from "lucide-react";
 
 import { BottomNav, appLinks } from "@/components/bottom-nav";
 import { useAuth } from "@/components/auth-provider";
@@ -27,19 +27,18 @@ export function AppShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#f2f0f3] py-2 pr-2 md:py-4 md:pr-4">
-      <div className="ml-0 flex min-h-[calc(100vh-1rem)] max-w-[1320px] overflow-hidden border border-[#cdb39d] bg-[#f8f4ea] shadow-[0_18px_48px_rgba(77,28,25,0.08)]">
+    <div className="min-h-screen w-full bg-[#f2f0f3]">
+      <div className="flex min-h-screen w-full overflow-hidden border border-[#cdb39d] bg-[#f8f4ea] shadow-[0_18px_48px_rgba(77,28,25,0.08)] lg:h-screen lg:max-h-screen">
         <aside
           aria-label="Primary"
-          className="hidden min-h-full w-[208px] shrink-0 flex-col justify-between border-r border-[#bda28a] bg-[#fbf8ef] lg:flex"
+          className="hidden min-h-full shrink-0 flex-col justify-between border-r border-[#bda28a] bg-[#fbf8ef] lg:flex lg:h-screen lg:w-[256px]"
         >
           <div className="p-4">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 rounded-full border border-[#9d2b23] bg-white px-3 py-2 text-[14px] font-bold text-[#8f100d]"
+              className="inline-flex items-center rounded-full border border-[#9d2b23] bg-white px-3 py-2 text-[14px] font-bold text-[#8f100d]"
             >
-              <Sparkles className="h-3.5 w-3.5" />
-              MyMentari
+              CleanMerit
             </Link>
 
             <nav aria-label="Primary" className="mt-11 space-y-2">
@@ -92,25 +91,24 @@ export function AppShell({
           </div>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col bg-white">
-          <header className="relative overflow-hidden border-b border-[#d8c4b2]">
+        <div className="flex min-w-0 flex-1 flex-col bg-white lg:h-screen lg:overflow-y-auto">
+          <header className="relative z-20 overflow-visible border-b border-[#d8c4b2]">
             <div className="absolute inset-0 bg-[linear-gradient(90deg,#8d0f10_0%,#cb5f5e_56%,#fff4f4_100%)]" />
-            <div className="relative flex flex-wrap items-start justify-between gap-5 px-5 pb-7 pt-8 md:px-8 md:pb-8 md:pt-10">
+            <div className="relative flex flex-wrap items-start justify-between gap-4 px-5 pb-4 pt-5 md:px-8 md:pb-5 md:pt-6">
               <div className="max-w-3xl">
                 <div className="flex items-center gap-3 lg:hidden">
                   <Link
                     href="/"
-                    className="inline-flex items-center gap-2 rounded-full border border-[#9d2b23] bg-white px-3 py-2 text-[13px] font-bold text-[#8f100d]"
+                    className="inline-flex items-center rounded-full border border-[#9d2b23] bg-white px-3 py-2 text-[13px] font-bold text-[#8f100d]"
                   >
-                    <Sparkles className="h-3.5 w-3.5" />
-                    MyMentari
+                    CleanMerit
                   </Link>
                 </div>
 
-                <h1 className="mt-4 font-display text-[44px] leading-none text-white md:text-[52px]">
+                <h1 className="mt-3 font-display text-[32px] leading-none text-white md:text-[38px]">
                   {title}
                 </h1>
-                <p className="mt-3 max-w-2xl text-[17px] font-semibold leading-6 text-[#fff4f3]">
+                <p className="mt-2 max-w-2xl text-[14px] font-semibold leading-5 text-[#fff4f3] md:text-[15px]">
                   {subtitle}
                 </p>
               </div>
@@ -148,7 +146,7 @@ export function AppShell({
             </div>
           </header>
 
-          <main className="flex-1 bg-white px-0 py-0">{children}</main>
+          <main className="relative z-0 flex-1 bg-white px-0 py-0">{children}</main>
           <BottomNav />
         </div>
       </div>

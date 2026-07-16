@@ -164,7 +164,7 @@ export default function ReportPage() {
       <div className="px-5 py-7 md:px-8 md:py-8">
         <form
           onSubmit={(event) => void handleSubmit(event)}
-          className="mx-auto max-w-[840px] space-y-5 rounded-[22px] border border-[#d8c4b2] bg-[#fffdf8] p-5 md:p-6"
+          className="mx-auto w-full max-w-[920px] space-y-5 rounded-[22px] border border-[#d8c4b2] bg-[#fffdf8] p-5 md:p-6"
         >
           <section className="rounded-[18px] border border-[#eadbcc] bg-[#fbf7ef] p-4 md:p-5">
             <div className="flex items-center gap-3">
@@ -192,7 +192,6 @@ export default function ReportPage() {
                 type="file"
                 accept="image/*"
                 multiple
-                required
                 onChange={(event) => {
                   const nextFiles = Array.from(event.target.files ?? []).slice(0, 3);
                   appendFiles(nextFiles);
