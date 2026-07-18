@@ -54,8 +54,8 @@ export default function LeaderboardPage() {
           {error}
         </div>
       ) : (
-        <div className="mx-5 my-5 overflow-hidden rounded-[22px] border border-[#dfcec0] bg-white md:mx-8">
-          <div className="grid grid-cols-[80px_minmax(0,1fr)_140px] gap-4 border-b border-[#efe4d2] bg-[#fbf6ef] px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-[#8d6d63]">
+        <div className="mx-4 my-5 overflow-hidden rounded-[22px] border border-[#dfcec0] bg-white sm:mx-5 md:mx-8">
+          <div className="hidden grid-cols-[80px_minmax(0,1fr)_140px] gap-4 border-b border-[#efe4d2] bg-[#fbf6ef] px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-[#8d6d63] sm:grid">
             <div>Rank</div>
             <div>Member</div>
             <div>Points</div>
@@ -64,7 +64,7 @@ export default function LeaderboardPage() {
             {entries.map((entry, index) => (
               <div
                 key={entry.id}
-                className={`grid grid-cols-[80px_minmax(0,1fr)_140px] gap-4 px-5 py-4 ${
+                className={`grid grid-cols-1 gap-3 px-4 py-4 sm:grid-cols-[80px_minmax(0,1fr)_140px] sm:gap-4 sm:px-5 ${
                   entry.id === user?.uid ? "bg-[#fff3ef]" : ""
                 }`}
               >
@@ -77,7 +77,7 @@ export default function LeaderboardPage() {
                     {entry.email}
                   </p>
                 </div>
-                <div className="text-sm font-bold text-[#8e0d0d]">
+                <div className="text-sm font-bold text-[#8e0d0d] sm:text-right">
                   {entry.total_points}
                 </div>
               </div>

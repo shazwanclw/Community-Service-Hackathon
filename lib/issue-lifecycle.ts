@@ -5,6 +5,7 @@ export const ISSUE_EXTENSION_WINDOW_MS = 12 * 60 * 60 * 1000;
 
 export type IssuePhase =
   | "available"
+  | "awaiting_points"
   | "claimed"
   | "pending_review"
   | "resolved";
@@ -37,6 +38,7 @@ export function getIssueView(
   nowMs = Date.now(),
   viewerId?: string | null,
 ): IssueView {
+  const pointStatus = issue.point_status ?? "scored";
   const activeClaim = isIssueClaimActive(issue, nowMs);
   const isOwnedByViewer = Boolean(viewerId && issue.fixer_id === viewerId && activeClaim);
   const likedBy = issue.liked_by ?? [];
@@ -78,6 +80,19 @@ export function getIssueView(
       likeCount: likedBy.length,
       phase: "claimed",
       statusLabel: "Claimed",
+    };
+  }
+
+  if (pointStatus === "pending_admin_review") {
+    return {
+      canClaim: false,
+      canSubmitProof: false,
+      commentCount: comments.length,
+      isLikedByViewer: Boolean(viewerId && likedBy.includes(viewerId)),
+      isOwnedByViewer: false,
+      likeCount: likedBy.length,
+      phase: "awaiting_points",
+      statusLabel: issue.point_status_label ?? "Waiting for admin points",
     };
   }
 

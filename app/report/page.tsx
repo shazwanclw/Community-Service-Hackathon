@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, doc, increment, serverTimestamp, setDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { Camera, ImagePlus, LoaderCircle, X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
@@ -10,6 +9,9 @@ import { FormEvent, useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { useAuth } from "@/components/auth-provider";
 import { db, storage } from "@/lib/firebase";
+import { HazardScore } from "@/lib/types";
+
+const REPORT_REWARD_POINTS = 10;
 
 function fileToBase64(file: File) {
   return new Promise<string>((resolve, reject) => {
@@ -31,18 +33,15 @@ function fileToBase64(file: File) {
 }
 
 export default function ReportPage() {
-  const router = useRouter();
   const { loading, profile, user } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/auth");
-    }
-  }, [loading, router, user]);
+  const [location, setLocation] = useState("");
+  const [description, setDescription] = useState("");
+  const [captionLoading, setCaptionLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
@@ -73,8 +72,8 @@ export default function ReportPage() {
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const description = String(formData.get("description") ?? "").trim();
-    const location = String(formData.get("location") ?? "").trim();
+    const nextDescription = String(formData.get("description") ?? "").trim();
+    const nextLocation = String(formData.get("location") ?? "").trim();
 
     try {
       const uploads = await Promise.all(
@@ -115,10 +114,12 @@ export default function ReportPage() {
         throw new Error(payload?.error ?? "Failed to score the hazard image.");
       }
 
-      const score = (await response.json()) as { total_points: number };
+      const score = (await response.json()) as HazardScore;
       const reporterName =
         profile?.full_name?.trim() || user.displayName || user.email || "Community member";
       const reporterUsername = profile?.username?.trim() || null;
+      const pointStatus = score.point_status ?? "scored";
+      const pointValue = pointStatus === "pending_admin_review" ? 0 : score.total_points;
 
       await addDoc(collection(db, "issues"), {
         reporter_id: user.uid,
@@ -127,12 +128,15 @@ export default function ReportPage() {
         reporter_username: reporterUsername,
         fixer_id: null,
         status: "open",
-        description,
-        location,
+        description: nextDescription,
+        location: nextLocation,
         before_photo_url: uploads[0],
         before_photo_urls: uploads,
         after_photo_url: null,
-        point_value: score.total_points,
+        point_value: pointValue,
+        point_status: pointStatus,
+        point_source: score.point_source ?? "ai",
+        point_status_label: score.point_status_label ?? null,
         created_at: serverTimestamp(),
         claim_expires_at_ms: null,
         claimed_at_ms: null,
@@ -144,7 +148,25 @@ export default function ReportPage() {
         comments: [],
       });
 
-      router.push("/");
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          total_points: increment(REPORT_REWARD_POINTS),
+        },
+        { merge: true },
+      );
+
+      setFiles([]);
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      setPreviewUrls([]);
+      setDescription("");
+      setLocation("");
+      setSuccessMessage(
+        pointStatus === "pending_admin_review"
+          ? `Report submitted. You earned ${REPORT_REWARD_POINTS} points. Task points are waiting for admin approval.`
+          : `Report submitted. You earned ${REPORT_REWARD_POINTS} points.`,
+      );
+      event.currentTarget.reset();
     } catch (submissionError) {
       const message =
         submissionError instanceof Error
@@ -156,15 +178,58 @@ export default function ReportPage() {
     }
   }
 
+  async function handleGenerateCaption() {
+    if (!files.length) {
+      setError("Add at least one image before asking AI to write the issue details.");
+      return;
+    }
+
+    setCaptionLoading(true);
+    setError(null);
+
+    try {
+      const imageBase64 = await fileToBase64(files[0]);
+      const response = await fetch("/api/report-caption", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          imageBase64,
+          mimeType: files[0].type,
+          location,
+        }),
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | { caption?: string; error?: string }
+        | null;
+
+      if (!response.ok || !payload?.caption) {
+        throw new Error(payload?.error ?? "AI caption generation failed.");
+      }
+
+      setDescription(payload.caption);
+    } catch (captionError) {
+      setError(
+        captionError instanceof Error
+          ? captionError.message
+          : "AI caption generation failed.",
+      );
+    } finally {
+      setCaptionLoading(false);
+    }
+  }
+
   return (
     <AppShell
       title="Report Board"
-      subtitle="Upload the issue photos and explain what happened so the community can respond quickly."
+      subtitle="Upload the issue photos, explain what happened, and earn 10 points."
     >
-      <div className="px-5 py-7 md:px-8 md:py-8">
+      <div className="px-4 py-5 sm:px-5 md:px-8 md:py-8">
         <form
           onSubmit={(event) => void handleSubmit(event)}
-          className="mx-auto w-full max-w-[920px] space-y-5 rounded-[22px] border border-[#d8c4b2] bg-[#fffdf8] p-5 md:p-6"
+          className="mx-auto w-full max-w-[920px] space-y-4 rounded-[22px] border border-[#d8c4b2] bg-[#fffdf8] p-4 shadow-[0_14px_36px_rgba(77,28,25,0.08)] sm:space-y-5 sm:p-5 md:p-6"
         >
           <section className="rounded-[18px] border border-[#eadbcc] bg-[#fbf7ef] p-4 md:p-5">
             <div className="flex items-center gap-3">
@@ -253,6 +318,8 @@ export default function ReportPage() {
             </p>
             <input
               name="location"
+              value={location}
+              onChange={(event) => setLocation(event.target.value)}
               required
               placeholder="Example: Block C parking lot"
               className="mt-4 w-full rounded-[16px] border border-[#d8c4b2] bg-white px-4 py-3 text-[16px] text-[#321817] outline-none placeholder:text-[#b9aca4]"
@@ -260,12 +327,27 @@ export default function ReportPage() {
           </section>
 
           <section className="rounded-[18px] border border-[#eadbcc] bg-[#fbf7ef] p-4 md:p-5">
-            <h2 className="text-lg font-semibold text-[#321817]">Issue details</h2>
-            <p className="mt-1 text-sm text-[#7c6761]">
-              Explain clearly what the problem is and where it happened.
-            </p>
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-[#321817]">Issue details</h2>
+                <p className="mt-1 text-sm text-[#7c6761]">
+                  Explain clearly what the problem is and where it happened.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void handleGenerateCaption()}
+                disabled={captionLoading || !files.length}
+                className="inline-flex items-center gap-2 rounded-full border border-[#d8c4b2] bg-white px-4 py-2 text-sm font-semibold text-[#8e0d0d] disabled:opacity-60"
+              >
+                {captionLoading ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
+                AI caption
+              </button>
+            </div>
             <textarea
               name="description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
               required
               rows={6}
               placeholder="Describe the issue..."
@@ -276,6 +358,12 @@ export default function ReportPage() {
           {error ? (
             <div className="rounded-[18px] border border-[#f0b7b7] bg-[#fff1f1] px-4 py-3 text-sm text-[#a63f3f]">
               {error}
+            </div>
+          ) : null}
+
+          {successMessage ? (
+            <div className="rounded-[18px] border border-[#cfe6d4] bg-[#eef8f1] px-4 py-3 text-sm text-[#2d5a36]">
+              {successMessage}
             </div>
           ) : null}
 

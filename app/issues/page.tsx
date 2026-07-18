@@ -100,7 +100,7 @@ export default function IssuesPage() {
     setError(null);
 
     try {
-      await postAuthedJson("/api/issues/claim", { issueId });
+      await postAuthedJson("/api/issues/claim", { issueId }, { timeoutMs: 10000 });
       router.push("/tasks");
     } catch (actionError) {
       setError(actionError instanceof Error ? actionError.message : "Claim failed.");
@@ -118,7 +118,7 @@ export default function IssuesPage() {
           <button
             type="button"
             onClick={() => setFilterOpen((current) => !current)}
-            className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white px-4 py-3 text-sm font-semibold text-[#8e0d0d]"
+            className="inline-flex items-center gap-2 rounded-full border border-white/35 bg-white px-3 py-2.5 text-xs font-semibold text-[#8e0d0d] shadow-[0_12px_28px_rgba(77,28,25,0.14)] sm:px-4 sm:py-3 sm:text-sm"
           >
             <Funnel className="h-4 w-4" />
             Filter
@@ -162,8 +162,8 @@ export default function IssuesPage() {
           <LoaderCircle className="h-8 w-8 animate-spin text-[#8e0d0d]" />
         </div>
       ) : (
-        <div className="px-5 py-5 md:px-8">
-          <div className="mb-5 flex flex-wrap gap-3">
+        <div className="px-4 py-5 sm:px-5 md:px-8">
+          <div className="mb-5 flex flex-nowrap gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:gap-3">
             {[
               { value: "all" as const, label: "All" },
               { value: "active" as const, label: "Active claim" },
@@ -177,7 +177,7 @@ export default function IssuesPage() {
                   key={tab.value}
                   type="button"
                   onClick={() => setStatusFilter(tab.value)}
-                  className={`inline-flex items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold transition ${
+                  className={`inline-flex shrink-0 items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold transition ${
                     active
                       ? "bg-[#8e0d0d] text-white"
                       : "border border-[#d8c4b2] bg-[#fffdf8] text-[#7b1917]"
@@ -189,7 +189,7 @@ export default function IssuesPage() {
             })}
           </div>
 
-          <div className="overflow-hidden rounded-[22px] border border-[#dfcec0] bg-white">
+          <div className="space-y-3 md:space-y-0 md:overflow-hidden md:rounded-[22px] md:border md:border-[#dfcec0] md:bg-white">
             <div className="hidden grid-cols-[140px_minmax(0,1.8fr)_120px_120px_180px] gap-4 border-b border-[#efe4d2] bg-[#fbf6ef] px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-[#8d6d63] md:grid">
               <div>Reporter</div>
               <div>Issue</div>
@@ -210,7 +210,7 @@ export default function IssuesPage() {
                 return (
                   <div
                     key={issue.id}
-                    className="grid grid-cols-1 gap-4 px-5 py-5 md:grid-cols-[140px_minmax(0,1.8fr)_120px_120px_180px]"
+                    className="grid grid-cols-1 gap-4 rounded-[22px] border border-[#dfcec0] bg-white px-4 py-4 shadow-[0_12px_30px_rgba(77,28,25,0.06)] md:grid-cols-[140px_minmax(0,1.8fr)_120px_120px_180px] md:rounded-none md:border-0 md:bg-transparent md:px-5 md:py-5 md:shadow-none"
                   >
                     <div className="text-sm font-semibold text-[#321817]">{displayName}</div>
 
@@ -224,7 +224,7 @@ export default function IssuesPage() {
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
                       {imageUrls.slice(0, 3).map((imageUrl, index) => (
                         <div
                           key={`${issue.id}-image-${index}`}
@@ -241,7 +241,11 @@ export default function IssuesPage() {
                       ))}
                     </div>
 
-                    <div className="text-sm font-bold text-[#8e0d0d]">{issue.point_value} pts</div>
+                    <div className="text-sm font-bold text-[#8e0d0d]">
+                      {view.phase === "awaiting_points"
+                        ? "Pending admin"
+                        : `${issue.point_value} pts`}
+                    </div>
 
                     <div className="flex flex-wrap gap-2">
                       <button

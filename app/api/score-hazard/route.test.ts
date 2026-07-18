@@ -36,6 +36,9 @@ describe("POST /api/score-hazard", () => {
       hazard_score: 5,
       effort_score: 6,
       total_points: 15,
+      point_status: "scored",
+      point_source: "ai",
+      point_status_label: null,
     });
   });
 
@@ -58,7 +61,12 @@ describe("POST /api/score-hazard", () => {
     );
 
     expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual(FALLBACK_HAZARD_SCORE);
+    await expect(response.json()).resolves.toEqual({
+      ...FALLBACK_HAZARD_SCORE,
+      point_status: "pending_admin_review",
+      point_source: "fallback",
+      point_status_label: "Waiting for admin points",
+    });
   });
 
   it("rejects requests without image content", async () => {

@@ -15,13 +15,13 @@ const display = Lexend({
 });
 
 export const metadata: Metadata = {
-  title: "CleanMerit",
+  title: "SnapFix",
   description: "Community cleanup and repair rewards for Desa Mentari.",
-  applicationName: "CleanMerit",
+  applicationName: "SnapFix",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "CleanMerit",
+    title: "SnapFix",
   },
   manifest: "/manifest.webmanifest",
 };

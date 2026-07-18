@@ -7,6 +7,8 @@ import { parseGeminiHazardScore } from "@/lib/score-parser";
 
 const HAZARD_PROMPT =
   "Analyze this image of a community hazard. Evaluate it on a scale of 1 to 10 for three criteria: 1) Size of the area. 2) Hazard level. 3) Physical effort needed. Return ONLY a raw JSON object with these three scores and a 'total_points' integer (which is the sum of the three). Do not return markdown.";
+const CAPTION_PROMPT =
+  "Write a short, practical community issue report in 2 to 3 sentences. Describe what is visibly wrong, mention likely urgency, and keep the wording plain and factual. Do not use markdown.";
 
 const GEMINI_MODEL =
   process.env.GEMINI_MODEL?.trim() || "gemini-flash-latest";
@@ -82,4 +84,34 @@ export async function analyzeHazardImage(input: HazardImageInput) {
   ]);
 
   return parseGeminiHazardScore(result.response.text());
+}
+
+export async function generateHazardCaption(
+  input: HazardImageInput & { location?: string },
+) {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured.");
+  }
+
+  const client = new GoogleGenerativeAI(apiKey);
+  const model = client.getGenerativeModel({
+    model: GEMINI_MODEL,
+    generationConfig: {
+      temperature: 0.4,
+    },
+  });
+
+  const locationPrompt = input.location?.trim()
+    ? `Location context: ${input.location.trim()}`
+    : "Location context: not provided";
+
+  const result = await model.generateContent([
+    CAPTION_PROMPT,
+    locationPrompt,
+    await toInlineData(input),
+  ]);
+
+  return result.response.text().trim();
 }

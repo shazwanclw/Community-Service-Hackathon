@@ -1,7 +1,26 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import IssuesPage from "@/app/issues/page";
+import { postAuthedJson } from "@/lib/client-api";
+
+const issuesSnapshotState = {
+  docs: [
+    {
+      id: "issue-1",
+      data: () => ({
+        reporter_id: "reporter-1",
+        reporter_name: "Aina",
+        status: "open",
+        description: "Overflowing bin",
+        before_photo_url: "https://example.com/bin.jpg",
+        point_value: 12,
+        comments: [],
+        liked_by: [],
+      }),
+    },
+  ],
+};
 
 vi.mock("next/image", () => ({
   default: ({
@@ -63,21 +82,7 @@ vi.mock("firebase/firestore", () => ({
   collection: vi.fn(() => "issues-collection"),
   onSnapshot: vi.fn((_collection, onNext) => {
     onNext({
-      docs: [
-        {
-          id: "issue-1",
-          data: () => ({
-            reporter_id: "reporter-1",
-            reporter_name: "Aina",
-            status: "open",
-            description: "Overflowing bin",
-            before_photo_url: "https://example.com/bin.jpg",
-            point_value: 12,
-            comments: [],
-            liked_by: [],
-          }),
-        },
-      ],
+      docs: issuesSnapshotState.docs,
     });
 
     return vi.fn();
@@ -85,6 +90,25 @@ vi.mock("firebase/firestore", () => ({
 }));
 
 describe("IssuesPage", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    issuesSnapshotState.docs = [
+      {
+        id: "issue-1",
+        data: () => ({
+          reporter_id: "reporter-1",
+          reporter_name: "Aina",
+          status: "open",
+          description: "Overflowing bin",
+          before_photo_url: "https://example.com/bin.jpg",
+          point_value: 12,
+          comments: [],
+          liked_by: [],
+        }),
+      },
+    ];
+  });
+
   it("renders status subtabs and keeps the filter menu sort-only", async () => {
     render(<IssuesPage />);
 
@@ -108,5 +132,48 @@ describe("IssuesPage", () => {
     expect(
       screen.queryByRole("button", { name: /resolved/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("shows a waiting-for-admin-points label and no claim button when points are pending", async () => {
+    issuesSnapshotState.docs = [
+      {
+        id: "issue-1",
+        data: () => ({
+          reporter_id: "reporter-1",
+          reporter_name: "Aina",
+          status: "open",
+          description: "Overflowing bin",
+          before_photo_url: "https://example.com/bin.jpg",
+          point_value: 0,
+          point_status: "pending_admin_review",
+          comments: [],
+          liked_by: [],
+        }),
+      },
+    ];
+
+    render(<IssuesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Waiting for admin points")).toBeInTheDocument();
+    });
+
+    expect(screen.queryByRole("button", { name: /take task/i })).not.toBeInTheDocument();
+  });
+
+  it("surfaces claim errors instead of spinning forever", async () => {
+    vi.mocked(postAuthedJson).mockRejectedValueOnce(new Error("Request timed out."));
+
+    render(<IssuesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Overflowing bin")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /take task/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Request timed out.")).toBeInTheDocument();
+    });
   });
 });

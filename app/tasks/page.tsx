@@ -2,14 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { Eye, LoaderCircle, TimerReset } from "lucide-react";
+import { Eye, LoaderCircle, TimerReset, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { AppShell } from "@/components/app-shell";
 import { useAuth } from "@/components/auth-provider";
 import { IssuePreviewModal } from "@/components/issue-preview-modal";
+import { postAuthedJson } from "@/lib/client-api";
 import { db } from "@/lib/firebase";
 import { getIssueView } from "@/lib/issue-lifecycle";
 import { IssueRecord } from "@/lib/types";
@@ -52,19 +52,13 @@ function formatClaimTimeLeft(issue: IssueRecord, nowMs: number) {
 }
 
 export default function TasksPage() {
-  const router = useRouter();
   const { loading, user } = useAuth();
   const [issues, setIssues] = useState<IssueRecord[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TaskTab>("active");
   const [previewIssue, setPreviewIssue] = useState<IssueRecord | null>(null);
+  const [releasingIssueId, setReleasingIssueId] = useState<string | null>(null);
   const nowMs = useLiveNow();
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/auth");
-    }
-  }, [loading, router, user]);
 
   useEffect(() => {
     if (!user) {
@@ -121,6 +115,21 @@ export default function TasksPage() {
         ? pendingTasks
         : resolvedTasks;
 
+  async function handleReleaseTask(issueId: string) {
+    setReleasingIssueId(issueId);
+    setError(null);
+
+    try {
+      await postAuthedJson("/api/issues/release", { issueId }, { timeoutMs: 10000 });
+    } catch (releaseError) {
+      setError(
+        releaseError instanceof Error ? releaseError.message : "Failed to remove the task.",
+      );
+    } finally {
+      setReleasingIssueId(null);
+    }
+  }
+
   return (
     <AppShell
       title="Tasks Board"
@@ -135,8 +144,8 @@ export default function TasksPage() {
           {error}
         </div>
       ) : (
-        <div className="space-y-5 px-5 py-5 md:px-8">
-          <div className="flex flex-wrap gap-3">
+        <div className="space-y-5 px-4 py-5 sm:px-5 md:px-8">
+          <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:gap-3">
             {tabConfig.map((tab) => {
               const active = tab.key === activeTab;
 
@@ -145,7 +154,7 @@ export default function TasksPage() {
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`inline-flex items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold transition ${
+                  className={`inline-flex shrink-0 items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold transition ${
                     active
                       ? "bg-[#8e0d0d] text-white"
                       : "border border-[#d8c4b2] bg-[#fffdf8] text-[#7b1917]"
@@ -164,13 +173,14 @@ export default function TasksPage() {
             })}
           </div>
 
-          <div className="overflow-hidden rounded-[22px] border border-[#e2d1c3] bg-white">
-            <div className="hidden grid-cols-[minmax(0,1.5fr)_110px_170px_160px_150px] gap-4 border-b border-[#efe4d2] px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-[#8d6d63] md:grid">
+          <div className="space-y-3 md:space-y-0 md:overflow-hidden md:rounded-[22px] md:border md:border-[#e2d1c3] md:bg-white">
+            <div className="hidden grid-cols-[minmax(0,1.5fr)_110px_170px_160px_150px_64px] gap-4 border-b border-[#efe4d2] px-5 py-4 text-xs font-bold uppercase tracking-[0.18em] text-[#8d6d63] md:grid">
               <div>Task</div>
               <div>Points</div>
               <div>{activeTab === "active" ? "Deadline" : "Status"}</div>
               <div>Images</div>
               <div>Action</div>
+              <div className="sr-only">Remove</div>
             </div>
 
             {currentItems.length ? (
@@ -182,7 +192,7 @@ export default function TasksPage() {
                   return (
                     <div
                       key={issue.id}
-                      className="grid grid-cols-1 gap-4 px-5 py-5 md:grid-cols-[minmax(0,1.5fr)_110px_170px_160px_150px]"
+                      className="grid grid-cols-1 gap-4 rounded-[22px] border border-[#e2d1c3] bg-white px-4 py-4 shadow-[0_12px_30px_rgba(77,28,25,0.06)] md:grid-cols-[minmax(0,1.5fr)_110px_170px_160px_150px_64px] md:items-center md:rounded-none md:border-0 md:bg-transparent md:px-5 md:py-5 md:shadow-none"
                     >
                       <div className="flex items-start gap-4">
                         <div className="relative hidden h-20 w-24 shrink-0 overflow-hidden rounded-[18px] bg-[#e9e0d2] sm:block">
@@ -223,7 +233,7 @@ export default function TasksPage() {
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
                         <div className="relative h-14 w-16 overflow-hidden rounded-[16px] bg-[#e9e0d2]">
                           <Image
                             src={issue.before_photo_url}
@@ -256,12 +266,33 @@ export default function TasksPage() {
                           View
                         </button>
                         {canContinue ? (
-                          <Link
-                            href={`/issues/${issue.id}/fix`}
-                            className="inline-flex items-center rounded-full bg-[#8e0d0d] px-4 py-2 text-sm font-semibold text-white"
+                          <>
+                            <Link
+                              href={`/issues/${issue.id}/fix`}
+                              className="inline-flex items-center rounded-full bg-[#8e0d0d] px-4 py-2 text-sm font-semibold text-white"
+                            >
+                              Continue
+                            </Link>
+                          </>
+                        ) : null}
+                      </div>
+
+                      <div className="flex justify-start md:justify-center">
+                        {canContinue ? (
+                          <button
+                            type="button"
+                            aria-label="Remove task"
+                            title="Remove task"
+                            onClick={() => void handleReleaseTask(issue.id)}
+                            disabled={releasingIssueId === issue.id}
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#d8c4b2] bg-[#fff1f1] text-[#9d1c1c] disabled:opacity-60"
                           >
-                            Continue
-                          </Link>
+                            {releasingIssueId === issue.id ? (
+                              <LoaderCircle className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </button>
                         ) : null}
                       </div>
                     </div>

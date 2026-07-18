@@ -14,6 +14,22 @@ import {
 
 import { useAuth } from "@/components/auth-provider";
 
+function isFixTaskRoute(pathname: string) {
+  return /^\/issues\/[^/]+\/fix$/.test(pathname);
+}
+
+function isLinkActive(pathname: string, href: string) {
+  if (href === "/tasks" && isFixTaskRoute(pathname)) {
+    return true;
+  }
+
+  if (href === "/issues" && isFixTaskRoute(pathname)) {
+    return false;
+  }
+
+  return pathname === href || (href !== "/" && pathname.startsWith(href));
+}
+
 export const appLinks = [
   { href: "/", label: "Home", icon: House },
   { href: "/report", label: "Report", icon: CirclePlus },
@@ -39,8 +55,7 @@ export function BottomNav() {
     >
       <div className="flex gap-2 overflow-x-auto px-3 py-2.5">
         {links.map(({ href, icon: Icon, label }) => {
-          const active =
-            pathname === href || (href !== "/" && pathname.startsWith(href));
+          const active = isLinkActive(pathname, href);
 
           return (
             <Link

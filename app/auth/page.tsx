@@ -11,6 +11,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
 import { FormEvent, useState } from "react";
 
+import { getAuthErrorMessage } from "@/lib/auth-error";
 import { auth, db } from "@/lib/firebase";
 
 type Mode = "login" | "signup";
@@ -56,11 +57,7 @@ export default function AuthPage() {
 
       router.push("/");
     } catch (submissionError) {
-      const message =
-        submissionError instanceof Error
-          ? submissionError.message
-          : "Authentication failed.";
-      setError(message);
+      setError(getAuthErrorMessage(submissionError, mode));
     } finally {
       setLoading(false);
     }
@@ -72,7 +69,7 @@ export default function AuthPage() {
         <div className="hidden h-full min-h-[680px] w-[44%] flex-col justify-between border-r border-[#bda28a] bg-[#fbf8ef] p-6 lg:flex">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[#9d2b23] bg-white px-3 py-2 text-[14px] font-bold text-[#8f100d]">
-              MyMentari
+              SnapFix
             </div>
             <h1 className="mt-10 font-display text-5xl leading-none text-[#8e0d0d]">
               Community boards that look and feel connected.

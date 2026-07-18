@@ -25,7 +25,12 @@ export async function POST(request: Request) {
     }
 
     const score = await analyzeHazardImage(body);
-    return Response.json(score);
+    return Response.json({
+      ...score,
+      point_status: score.point_status ?? "scored",
+      point_source: score.point_source ?? "ai",
+      point_status_label: score.point_status_label ?? null,
+    });
   } catch (error) {
     if (body?.imageBase64 || body?.imageUrl) {
       return Response.json(getFallbackHazardScore());

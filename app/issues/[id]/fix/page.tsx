@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { doc, onSnapshot } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
@@ -28,12 +29,6 @@ export default function FixIssuePage() {
   const [progressNote, setProgressNote] = useState("");
   const [requestingExtension, setRequestingExtension] = useState(false);
   const missingIssueId = !params.id;
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/auth");
-    }
-  }, [loading, router, user]);
 
   useEffect(() => {
     if (missingIssueId) {
@@ -150,8 +145,8 @@ export default function FixIssuePage() {
 
   return (
     <AppShell
-      title="Claim & Fix"
-      subtitle="Show the completed repair clearly so the moderation queue can approve it quickly."
+      title="Continue Task"
+      subtitle="Document the finished repair clearly, leave enough breathing room to review the issue, and submit proof when the work is ready."
     >
       {missingIssueId ? (
         <div className="rounded-[30px] border border-[#f0b7b7] bg-[#fff1f1] px-5 py-10 text-center text-sm text-[#a63f3f]">
@@ -166,8 +161,21 @@ export default function FixIssuePage() {
           {error ?? "This issue could not be loaded."}
         </div>
       ) : (
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)]">
-          <div className="overflow-hidden rounded-[30px] border border-[#d8d0c3] bg-white">
+        <div className="space-y-8 px-5 py-8 md:px-8 md:py-10">
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/tasks"
+              className="inline-flex items-center rounded-full border border-[#d8c4b2] bg-[#fffaf3] px-4 py-2 text-sm font-semibold text-[#7b1917]"
+            >
+              Task tab
+            </Link>
+            <span className="inline-flex items-center rounded-full bg-[#8e0d0d] px-4 py-2 text-sm font-semibold text-white">
+              Continue task
+            </span>
+          </div>
+
+          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.95fr)]">
+          <div className="overflow-hidden rounded-[30px] border border-[#d8d0c3] bg-white shadow-[0_20px_50px_rgba(77,28,25,0.08)]">
             <div className="relative aspect-[16/10]">
               <Image
                 src={issue.before_photo_url}
@@ -177,13 +185,13 @@ export default function FixIssuePage() {
                 sizes="(max-width: 1279px) 100vw, 55vw"
               />
             </div>
-            <div className="p-5">
-              <p className="text-sm leading-6 text-[#2c4633]">{issue.description}</p>
-              <p className="mt-3 text-sm font-semibold text-[#8f4b11]">
+            <div className="space-y-5 p-6 md:p-7">
+              <p className="text-sm leading-7 text-[#2c4633]">{issue.description}</p>
+              <p className="text-sm font-semibold text-[#8f4b11]">
                 Reward: {issue.point_value} points
               </p>
               {issue.claim_expires_at_ms ? (
-                <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#fff4e6] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#8f4b11]">
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#fff4e6] px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#8f4b11]">
                   <TimerReset className="h-4 w-4" />
                   Claim deadline: {new Date(issue.claim_expires_at_ms).toLocaleString()}
                 </div>
@@ -191,9 +199,9 @@ export default function FixIssuePage() {
             </div>
           </div>
 
-          <div className="space-y-4">
-            <form onSubmit={(event) => void handleSubmit(event)} className="space-y-4">
-              <label className="block rounded-[30px] border border-dashed border-[#cbbfaa] bg-white/80 p-5">
+          <div className="space-y-6">
+            <form onSubmit={(event) => void handleSubmit(event)} className="space-y-6">
+              <label className="block rounded-[30px] border border-dashed border-[#cbbfaa] bg-white/80 p-6">
                 <span className="mb-3 flex items-center gap-2 text-sm font-semibold text-[#123524]">
                   <Wrench className="h-4 w-4" />
                   Completed task proof
@@ -244,7 +252,7 @@ export default function FixIssuePage() {
               </button>
             </form>
 
-            <div className="rounded-[30px] border border-[#d8d0c3] bg-white p-5">
+            <div className="rounded-[30px] border border-[#d8d0c3] bg-white p-6">
               <h2 className="text-sm font-bold uppercase tracking-[0.2em] text-[#47624b]">
                 Need more time?
               </h2>
@@ -280,6 +288,7 @@ export default function FixIssuePage() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       )}
     </AppShell>

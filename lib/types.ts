@@ -1,6 +1,8 @@
 import { Timestamp } from "firebase/firestore";
 
 export type IssueStatus = "open" | "pending" | "approved";
+export type IssuePointStatus = "scored" | "pending_admin_review" | "approved";
+export type IssuePointSource = "ai" | "fallback" | "admin";
 
 export type UserProfile = {
   email: string;
@@ -39,6 +41,9 @@ export type IssueRecord = {
   reporter_username?: string | null;
   claim_expires_at_ms?: number | null;
   claimed_at_ms?: number | null;
+  point_status?: IssuePointStatus | null;
+  point_source?: IssuePointSource | null;
+  point_status_label?: string | null;
   extension_status?: IssueExtensionStatus | null;
   extension_reason?: string | null;
   extension_progress_note?: string | null;
@@ -52,6 +57,9 @@ export type HazardScore = {
   hazard_score: number;
   effort_score: number;
   total_points: number;
+  point_status?: IssuePointStatus;
+  point_source?: IssuePointSource;
+  point_status_label?: string | null;
 };
 
 export type RewardItem = {

@@ -2,8 +2,8 @@ import { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "CleanMerit",
-    short_name: "CleanMerit",
+    name: "SnapFix",
+    short_name: "SnapFix",
     description: "Report hazards, submit fixes, and earn points for Desa Mentari.",
     start_url: "/",
     display: "standalone",

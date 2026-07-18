@@ -105,4 +105,32 @@ describe("issue lifecycle", () => {
       statusLabel: "Resolved",
     });
   });
+
+  it("keeps reports waiting for manual points unavailable", () => {
+    const issue = createIssue({
+      point_value: 0,
+      point_status: "pending_admin_review",
+    });
+
+    expect(getIssueView(issue, NOW)).toMatchObject({
+      canClaim: false,
+      canSubmitProof: false,
+      phase: "awaiting_points",
+      statusLabel: "Waiting for admin points",
+    });
+  });
+
+  it("allows claiming again after manual points are assigned", () => {
+    const issue = createIssue({
+      point_value: 18,
+      point_status: "approved",
+      point_source: "admin",
+    });
+
+    expect(getIssueView(issue, NOW)).toMatchObject({
+      canClaim: true,
+      phase: "available",
+      statusLabel: "Open Task",
+    });
+  });
 });
