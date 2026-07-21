@@ -21,6 +21,7 @@ describe("GET /api/version", () => {
       branch: "main",
       commit: "a2ad16f",
       environment: "local",
+      nodeVersion: process.version,
     });
   });
 
@@ -36,6 +37,7 @@ describe("GET /api/version", () => {
       branch: null,
       commit: "local",
       environment: "local",
+      nodeVersion: process.version,
     });
   });
 });

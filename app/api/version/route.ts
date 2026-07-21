@@ -13,5 +13,6 @@ export async function GET() {
     branch: process.env.VERCEL_GIT_COMMIT_REF?.trim() || null,
     commit: getShortCommit(),
     environment: process.env.VERCEL_ENV?.trim() || "local",
+    nodeVersion: process.version,
   });
 }
