@@ -1,30 +1,12 @@
-type FirebaseAdminAppModule = typeof import("firebase-admin/app");
-type FirebaseAdminAuthModule = typeof import("firebase-admin/auth");
-type FirebaseAdminFirestoreModule = typeof import("firebase-admin/firestore");
-
-function requireModule<TModule>(moduleId: string) {
-  return eval("require")(moduleId) as TModule;
-}
-
-function getFirebaseAdminAppModule() {
-  return requireModule<FirebaseAdminAppModule>("firebase-admin/app");
-}
-
-function getFirebaseAdminAuthModule() {
-  return requireModule<FirebaseAdminAuthModule>("firebase-admin/auth");
-}
-
-function getFirebaseAdminFirestoreModule() {
-  return requireModule<FirebaseAdminFirestoreModule>("firebase-admin/firestore");
-}
+import { cert, getApp, getApps, initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 
 function getPrivateKey() {
   return process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n");
 }
 
 function getFirebaseAdminApp() {
-  const { cert, getApp, getApps, initializeApp } = getFirebaseAdminAppModule();
-
   if (getApps().length) {
     return getApp();
   }
@@ -47,9 +29,9 @@ function getFirebaseAdminApp() {
 }
 
 export function getAdminAuth() {
-  return getFirebaseAdminAuthModule().getAuth(getFirebaseAdminApp());
+  return getAuth(getFirebaseAdminApp());
 }
 
 export function getAdminDb() {
-  return getFirebaseAdminFirestoreModule().getFirestore(getFirebaseAdminApp());
+  return getFirestore(getFirebaseAdminApp());
 }
