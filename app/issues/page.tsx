@@ -112,7 +112,7 @@ export default function IssuesPage() {
   return (
     <AppShell
       title="Issues Board"
-      subtitle="Browse all reported issues in one place and filter the list when you need a faster scan."
+      subtitle="Browse reported issues."
       actions={
         <div className="relative">
           <button

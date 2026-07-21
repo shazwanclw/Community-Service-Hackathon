@@ -146,7 +146,7 @@ export default function FixIssuePage() {
   return (
     <AppShell
       title="Continue Task"
-      subtitle="Document the finished repair clearly, leave enough breathing room to review the issue, and submit proof when the work is ready."
+      subtitle="Submit repair proof."
     >
       {missingIssueId ? (
         <div className="rounded-[30px] border border-[#f0b7b7] bg-[#fff1f1] px-5 py-10 text-center text-sm text-[#a63f3f]">

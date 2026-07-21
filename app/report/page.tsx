@@ -224,7 +224,7 @@ export default function ReportPage() {
   return (
     <AppShell
       title="Report Board"
-      subtitle="Upload the issue photos, explain what happened, and earn 10 points."
+      subtitle="Report issues, earn points."
     >
       <div className="px-4 py-5 sm:px-5 md:px-8 md:py-8">
         <form

@@ -43,7 +43,7 @@ export default function LeaderboardPage() {
   return (
     <AppShell
       title="Leaderboard"
-      subtitle="See how many verified points each member has earned and where you stand in the community."
+      subtitle="See top point earners."
     >
       {loading ? (
         <div className="flex min-h-[280px] items-center justify-center">

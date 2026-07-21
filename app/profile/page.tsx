@@ -187,7 +187,7 @@ export default function ProfilePage() {
   return (
     <AppShell
       title="Profile"
-      subtitle="Manage your account details and keep one clean summary of your community activity."
+      subtitle="Manage your account."
     >
       {loading ? (
         <div className="flex min-h-[280px] items-center justify-center">

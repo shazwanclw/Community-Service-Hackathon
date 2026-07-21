@@ -160,7 +160,7 @@ export default function AdminPage() {
     return (
       <AppShell
         title="Admin"
-        subtitle="This area is limited to moderation accounts configured in the app environment."
+        subtitle="Moderation only."
       >
         <div className="rounded-[30px] border border-dashed border-[#cbbfaa] bg-white/70 px-5 py-10 text-center">
           <ShieldCheck className="mx-auto h-10 w-10 text-[#47624b]" />
@@ -177,7 +177,7 @@ export default function AdminPage() {
   return (
     <AppShell
       title="Moderation"
-      subtitle="Compare before and after evidence, then release points only when the repair is complete."
+      subtitle="Approve repairs and points."
     >
       <div className="px-4 pt-5 sm:px-5 md:px-8">
         <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:gap-3">

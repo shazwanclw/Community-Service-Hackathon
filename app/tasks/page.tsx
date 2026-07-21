@@ -133,7 +133,7 @@ export default function TasksPage() {
   return (
     <AppShell
       title="Tasks Board"
-      subtitle="Track active work, keep an eye on deadlines, and keep a simple record of what you already finished."
+      subtitle="Track your task progress."
     >
       {loading ? (
         <div className="flex min-h-[280px] items-center justify-center">
