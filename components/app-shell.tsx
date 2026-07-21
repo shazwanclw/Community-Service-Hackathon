@@ -127,30 +127,29 @@ export function AppShell({
         <div className="flex min-w-0 flex-1 flex-col bg-white lg:h-screen lg:overflow-y-auto">
           <header className="relative z-20 overflow-visible border-b border-[#d8c4b2]">
             <div className="absolute inset-0 bg-[linear-gradient(90deg,#8d0f10_0%,#cb5f5e_56%,#fff4f4_100%)]" />
-            <div className="relative px-4 pb-5 pt-4 sm:px-5 md:px-8 md:pb-5 md:pt-6">
-              <div className="flex items-start gap-3 lg:hidden">
-                <button
-                  type="button"
-                  aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-                  aria-expanded={mobileMenuOpen}
-                  onClick={() => setMobileMenuOpen((current) => !current)}
-                  className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/12 text-white backdrop-blur"
-                >
-                  {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-                </button>
+            <div className="relative px-4 pb-5 pt-4 sm:px-5 md:px-8 md:pb-6 md:pt-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex min-w-0 items-start gap-3">
+                  <button
+                    type="button"
+                    aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                    aria-expanded={mobileMenuOpen}
+                    onClick={() => setMobileMenuOpen((current) => !current)}
+                    className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/12 text-white backdrop-blur lg:hidden"
+                  >
+                    {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                  </button>
 
-                <div className="min-w-0">
-                  <h1 className="font-display text-[26px] leading-none text-white sm:text-[32px] md:text-[38px]">
-                    {title}
-                  </h1>
-                  <p className="mt-2 max-w-2xl text-[13px] font-semibold leading-5 text-[#fff4f3] sm:text-[14px] md:text-[15px]">
-                    {subtitle}
-                  </p>
+                  <div className="min-w-0">
+                    <h1 className="font-display text-[26px] leading-none text-white sm:text-[32px] md:text-[38px]">
+                      {title}
+                    </h1>
+                    <p className="mt-2 max-w-2xl text-[13px] font-semibold leading-5 text-[#fff4f3] sm:text-[14px] md:text-[15px]">
+                      {subtitle}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="relative mt-0 hidden flex-wrap items-start justify-between gap-4 lg:flex">
-                <div />
                 {actions ? <div className="w-full sm:w-auto">{actions}</div> : null}
               </div>
             </div>

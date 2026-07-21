@@ -69,7 +69,7 @@ describe("AppShell", () => {
     expect(
       screen
         .getByRole("heading", { name: "Report Board" })
-        .parentElement?.parentElement?.parentElement,
+        .parentElement?.parentElement?.parentElement?.parentElement,
     ).toHaveClass("pb-5", "pt-4");
     expect(screen.getByRole("banner")).not.toHaveClass("overflow-hidden");
   });
