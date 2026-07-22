@@ -6,7 +6,6 @@ vi.mock("@/lib/gemini", () => ({
 
 import { POST } from "@/app/api/score-hazard/route";
 import { analyzeHazardImage } from "@/lib/gemini";
-import { FALLBACK_HAZARD_SCORE } from "@/lib/hazard-score";
 
 describe("POST /api/score-hazard", () => {
   it("returns the Gemini score when analysis succeeds", async () => {
@@ -43,6 +42,7 @@ describe("POST /api/score-hazard", () => {
   });
 
   it("returns the fallback score when analysis fails", async () => {
+    vi.spyOn(Math, "random").mockReturnValueOnce(0);
     vi.mocked(analyzeHazardImage).mockRejectedValueOnce(
       new Error("GEMINI_API_KEY is not configured."),
     );
@@ -62,10 +62,13 @@ describe("POST /api/score-hazard", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
-      ...FALLBACK_HAZARD_SCORE,
-      point_status: "pending_admin_review",
+      size_score: 1,
+      hazard_score: 2,
+      effort_score: 2,
+      total_points: 5,
+      point_status: "scored",
       point_source: "fallback",
-      point_status_label: "Waiting for admin points",
+      point_status_label: "Estimated by fallback scoring",
     });
   });
 

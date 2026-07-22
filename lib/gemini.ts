@@ -6,9 +6,9 @@ import type { Schema } from "@google/generative-ai";
 import { parseGeminiHazardScore } from "@/lib/score-parser";
 
 const HAZARD_PROMPT =
-  "Analyze this image of a community hazard. Evaluate it on a scale of 1 to 10 for three criteria: 1) Size of the area. 2) Hazard level. 3) Physical effort needed. Return ONLY a raw JSON object with these three scores and a 'total_points' integer (which is the sum of the three). Do not return markdown.";
+  "Analyze this image of a community hazard. Evaluate it on a scale of 1 to 10 for three criteria: 1) Size of the area. 2) Hazard level. 3) Physical effort needed. If the image is unclear, still estimate conservatively and keep the total_points between 5 and 15. Return ONLY a raw JSON object with these three scores and a 'total_points' integer (which is the sum of the three). Do not return markdown.";
 const CAPTION_PROMPT =
-  "Write a short, practical community issue report in 2 to 3 sentences. Describe what is visibly wrong, mention likely urgency, and keep the wording plain and factual. Do not use markdown.";
+  'Write a short, practical community issue report in 2 to 3 sentences. Describe what is visibly wrong, mention likely urgency, and keep the wording plain and factual. If the image is too unclear to describe confidently, return exactly "Image not clear." Do not use markdown.';
 
 const GEMINI_MODEL =
   process.env.GEMINI_MODEL?.trim() || "gemini-flash-latest";

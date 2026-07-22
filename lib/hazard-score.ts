@@ -1,13 +1,16 @@
-export const FALLBACK_HAZARD_SCORE = {
-  size_score: 3,
-  hazard_score: 3,
-  effort_score: 3,
-  total_points: 9,
-  point_status: "pending_admin_review",
-  point_source: "fallback",
-  point_status_label: "Waiting for admin points",
-} as const;
-
 export function getFallbackHazardScore() {
-  return { ...FALLBACK_HAZARD_SCORE };
+  const totalPoints = Math.floor(Math.random() * 11) + 5;
+  const sizeScore = Math.max(1, Math.floor(totalPoints / 3));
+  const hazardScore = Math.max(1, Math.floor((totalPoints - sizeScore) / 2));
+  const effortScore = totalPoints - sizeScore - hazardScore;
+
+  return {
+    size_score: sizeScore,
+    hazard_score: hazardScore,
+    effort_score: effortScore,
+    total_points: totalPoints,
+    point_status: "scored" as const,
+    point_source: "fallback" as const,
+    point_status_label: "Estimated by fallback scoring",
+  };
 }
