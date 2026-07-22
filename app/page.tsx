@@ -89,7 +89,7 @@ export default function HomePage() {
       title="Home Board"
       subtitle="See community updates."
       actions={
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+        <div className="hidden sm:flex sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
           <div className="rounded-full border border-white/35 bg-white px-4 py-3 text-sm font-semibold text-[#321817]">
             {availableCount} tasks available
           </div>
