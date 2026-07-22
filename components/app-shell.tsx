@@ -128,8 +128,8 @@ export function AppShell({
           <header className="relative z-20 overflow-visible border-b border-[#d8c4b2]">
             <div className="absolute inset-0 bg-[linear-gradient(90deg,#8d0f10_0%,#cb5f5e_56%,#fff4f4_100%)]" />
             <div className="relative px-4 pb-5 pt-4 sm:px-5 md:px-8 md:pb-6 md:pt-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex min-w-0 items-start gap-3">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex min-w-0 w-full items-start gap-3 sm:w-auto">
                   <button
                     type="button"
                     aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
@@ -140,7 +140,7 @@ export function AppShell({
                     {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
                   </button>
 
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h1 className="font-display text-[26px] leading-none text-white sm:text-[32px] md:text-[38px]">
                       {title}
                     </h1>
@@ -149,7 +149,6 @@ export function AppShell({
                     </p>
                   </div>
                 </div>
-
                 {actions ? <div className="w-full sm:w-auto">{actions}</div> : null}
               </div>
             </div>
