@@ -4,6 +4,9 @@ type BuildHazardScoreRequestInput = {
   mimeType?: string;
 };
 
+const GENERIC_CAPTION_FALLBACK =
+  "There is an issue visible in this area. Please check and fix it.";
+
 export function buildHazardScoreRequest({
   uploadedImageUrl,
   imageBase64,
@@ -36,4 +39,14 @@ export function normalizeCaptionErrorMessage(message?: string | null) {
   }
 
   return message ?? "Image is not clear for AI to give caption.";
+}
+
+export function getCaptionFallbackText(caption?: string | null) {
+  const normalized = caption?.trim();
+
+  if (normalized && normalized.length > 0) {
+    return normalized;
+  }
+
+  return GENERIC_CAPTION_FALLBACK;
 }

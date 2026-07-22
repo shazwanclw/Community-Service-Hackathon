@@ -1,4 +1,5 @@
 import { generateHazardCaption } from "@/lib/gemini";
+import { getCaptionFallbackText } from "@/lib/report-ai";
 
 function isImageNotClear(caption: string) {
   const normalized = caption.trim().toLowerCase();
@@ -32,16 +33,16 @@ export async function POST(request: Request) {
   try {
     const caption = await generateHazardCaption(body);
     if (!caption || isImageNotClear(caption)) {
-      return Response.json({ error: "Image not clear." }, { status: 422 });
+      return Response.json({ caption: getCaptionFallbackText() });
     }
 
     return Response.json({ caption });
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     if (!message || isImageNotClear(message)) {
-      return Response.json({ error: "Image not clear." }, { status: 422 });
+      return Response.json({ caption: getCaptionFallbackText() });
     }
 
-    return Response.json({ error: "Image not clear." }, { status: 422 });
+    return Response.json({ caption: getCaptionFallbackText() });
   }
 }

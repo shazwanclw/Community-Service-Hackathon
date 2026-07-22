@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { buildHazardScoreRequest, normalizeCaptionErrorMessage } from "@/lib/report-ai";
+import {
+  buildHazardScoreRequest,
+  getCaptionFallbackText,
+  normalizeCaptionErrorMessage,
+} from "@/lib/report-ai";
 
 describe("report AI helpers", () => {
   it("prefers an uploaded image URL for hazard scoring", () => {
@@ -36,6 +40,15 @@ describe("report AI helpers", () => {
     );
     expect(normalizeCaptionErrorMessage("Image not clear.")).toBe(
       "Image is not clear for AI to give caption.",
+    );
+  });
+
+  it("returns the generic caption fallback when no caption text is available", () => {
+    expect(getCaptionFallbackText()).toBe(
+      "There is an issue visible in this area. Please check and fix it.",
+    );
+    expect(getCaptionFallbackText("")).toBe(
+      "There is an issue visible in this area. Please check and fix it.",
     );
   });
 });

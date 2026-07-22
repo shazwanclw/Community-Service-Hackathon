@@ -50,9 +50,33 @@ describe("POST /api/report-caption", () => {
       }),
     );
 
-    expect(response.status).toBe(422);
+    expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
-      error: "Image not clear.",
+      caption: "There is an issue visible in this area. Please check and fix it.",
+    });
+  });
+
+  it("returns a simple fallback caption when caption generation throws", async () => {
+    vi.mocked(generateHazardCaption).mockRejectedValueOnce(
+      new Error("Failed to generate the report caption."),
+    );
+
+    const response = await POST(
+      new Request("http://localhost/api/report-caption", {
+        method: "POST",
+        body: JSON.stringify({
+          imageBase64: "abc123",
+          mimeType: "image/jpeg",
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      caption: "There is an issue visible in this area. Please check and fix it.",
     });
   });
 });
