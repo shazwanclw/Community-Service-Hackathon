@@ -9,6 +9,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { useAuth } from "@/components/auth-provider";
 import { db, storage } from "@/lib/firebase";
+import { buildHazardScoreRequest, normalizeCaptionErrorMessage } from "@/lib/report-ai";
 import { HazardScore } from "@/lib/types";
 
 const REPORT_REWARD_POINTS = 10;
@@ -92,18 +93,21 @@ export default function ReportPage() {
         }),
       );
 
-      const scoringFile = files[0];
-      const imageBase64 = await fileToBase64(scoringFile);
+      const scoreRequest = uploads[0]
+        ? buildHazardScoreRequest({
+            uploadedImageUrl: uploads[0],
+          })
+        : buildHazardScoreRequest({
+            imageBase64: await fileToBase64(files[0]),
+            mimeType: files[0]?.type,
+          });
 
       const response = await fetch("/api/score-hazard", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          imageBase64,
-          mimeType: scoringFile.type,
-        }),
+        body: JSON.stringify(scoreRequest),
       });
 
       if (!response.ok) {
@@ -206,15 +210,15 @@ export default function ReportPage() {
         | null;
 
       if (!response.ok || !payload?.caption) {
-        throw new Error(payload?.error ?? "AI caption generation failed.");
+        throw new Error(normalizeCaptionErrorMessage(payload?.error));
       }
 
       setDescription(payload.caption);
     } catch (captionError) {
       setError(
-        captionError instanceof Error
-          ? captionError.message
-          : "AI caption generation failed.",
+        normalizeCaptionErrorMessage(
+          captionError instanceof Error ? captionError.message : null,
+        ),
       );
     } finally {
       setCaptionLoading(false);
